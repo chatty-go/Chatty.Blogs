@@ -7,28 +7,16 @@
   <br>
 </h1>
 
-<h4 align="center">TechBlog CMS 是一款专为科技商务领域打造的现代化博客内容管理系统。它不仅提供了丰富的前端页面展示选项，如首页、博客列表、专栏文章等，还拥有强大的后台管理功能，包括文章编辑、分类管理、AI辅助写作等，旨在帮助个人或企业轻松搭建专业的在线知识分享平台。</h4>
+<h4 align="center">Chatty.Blgos 基于.Net8 MVC打造， 是一款专为科技商务领域打造的现代化博客内容管理系统。它不仅提供了丰富的前端页面展示选项，如首页、博客列表、专栏文章等，还拥有强大的后台管理功能，包括文章编辑、分类管理、AI辅助写作等，旨在帮助个人或企业轻松搭建专业的在线知识分享平台。</h4>
+
+
 
 <p align="center">
-  <a href="https://badge.fury.io/js/electron-markdownify">
-    <img src="https://badge.fury.io/js/electron-markdownify.svg"
-         alt="Gitter">
-  </a>
-  <a href="https://gitter.im/amitmerchant1990/electron-markdownify"><img src="https://badges.gitter.im/amitmerchant1990/electron-markdownify.svg"></a>
-  <a href="https://saythanks.io/to/bullredeyes@gmail.com">
-      <img src="https://img.shields.io/badge/SayThanks.io-%E2%98%BC-1EAEDB.svg">
-  </a>
-  <a href="https://www.paypal.me/AmitMerchant">
-    <img src="https://img.shields.io/badge/$-donate-ff69b4.svg?maxAge=2592000&amp;style=flat">
-  </a>
-</p>
-
-<p align="center">
-  <a href="#key-features">Key Features</a> •
-  <a href="#how-to-use">How To Use</a> •
-  <a href="#download">Download</a> •
-  <a href="#credits">Credits</a> •
-  <a href="#related">Related</a> •
+  <a href="#关键特性">关键特性</a> •
+  <a href="#准备工作">准备工作</a> •
+  <a href="#如何使用">如何使用</a> •
+  <a href="#我的邮箱">我的邮箱</a> •
+  <a href="#感谢这些项目">感谢这些项目</a> •
   <a href="#license">License</a>
 </p>
 
@@ -51,66 +39,67 @@
 * 跨平台部署
   - Windows, macOS and Linux ready.
 
-## How To Use
+## 准备工作
 
-To clone and run this application, you'll need [Git](https://git-scm.com) and [Node.js](https://nodejs.org/en/download/) (which comes with [npm](http://npmjs.com)) installed on your computer. From your command line:
+1、安装 Visual Studio 2022 开发工具  
+2、安装MySQL 8.0 数据库
+
+## 如何使用
+
+
+
+1、使用git克隆仓库:
 
 ```bash
-# Clone this repository
-$ git clone https://github.com/amitmerchant1990/electron-markdownify
+# 克隆仓库
+$ git clone https://github.com/chatty-go/Chatty.Blogs.git
 
-# Go into the repository
-$ cd electron-markdownify
-
-# Install dependencies
-$ npm install
-
-# Run the app
-$ npm start
 ```
 
-> **Note**
-> If you're using Linux Bash for Windows, [see this guide](https://www.howtogeek.com/261575/how-to-run-graphical-linux-desktop-applications-from-windows-10s-bash-shell/) or use `node` from the command prompt.
+2、创建数据库  
+
+在根目录下面找到database文件夹，里面有数据库脚本，使用数据库管理工具创建数据库并导入脚本。
 
 
-## Download
 
-You can [download](https://github.com/amitmerchant1990/electron-markdownify/releases/tag/v1.2.0) the latest installable version of Markdownify for Windows, macOS and Linux.
+3、配置数据库连接字符串
 
-## Emailware
+在Web项目下找到appsettings.json，配置数据库连接字符串
+```
+server=localhost;Database=chatty_blogs;Uid=;Pwd=
+```
 
-Markdownify is an [emailware](https://en.wiktionary.org/wiki/emailware). Meaning, if you liked using this app or it has helped you in any way, I'd like you send me an email at <bullredeyes@gmail.com> about anything you'd want to say about this software. I'd really appreciate it!
 
-## Credits
+4、启动项目
+在根目录下面找到解决方案文件 Chatty.Blogs.sln，右键使用 Visual Studio 2022 打开项目，然后按F5启动项目。
 
-This software uses the following open source packages:
+5、访问 http://localhost:5000 即可访问前台网站。
 
-- [Electron](http://electron.atom.io/)
-- [Node.js](https://nodejs.org/)
-- [Marked - a markdown parser](https://github.com/chjj/marked)
-- [showdown](http://showdownjs.github.io/showdown/)
-- [CodeMirror](http://codemirror.net/)
-- Emojis are taken from [here](https://github.com/arvida/emoji-cheat-sheet.com)
+6、访问 http://localhost:5000/admin 即可访问后台管理。
+
+默认用户名：admin  
+默认密码：123456
+
+
+
+## 我的邮箱
+
+如果您喜欢这个项目并且帮助到你，欢迎给我发邮件，我会很乐意收到您的反馈。邮箱地址：[chatty-go@outlook.com](chatty-go@outlook.com)
+
+## 感谢这些项目
+
+本项目使用了以下开源项目包:
+
+- [.net8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- [sqlsugar](https://www.donet5.com/Doc/1)
+- [bootstrap](https://getbootstrap.com/)
+- [aieditor.js](https://aieditor.dev/zh/getting-started.html)
+- [masonry](https://masonry.desandro.com/)
+- [dayjs](https://dayjs.fenxianglu.cn/)
+- [ztree](https://docs.caacle.com/zTree_v3/index.html)
+- [waypoints.js](http://imakewebthings.com/waypoints/)
 - [highlight.js](https://highlightjs.org/)
 
-## Related
-
-[markdownify-web](https://github.com/amitmerchant1990/markdownify-web) - Web version of Markdownify
-
-## Support
-
-<a href="https://buymeacoffee.com/amitmerchant" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/purple_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
-
-<p>Or</p> 
-
-<a href="https://www.patreon.com/amitmerchant">
-	<img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" width="160">
-</a>
-
-## You may also like...
-
-- [Pomolectron](https://github.com/amitmerchant1990/pomolectron) - A pomodoro app
-- [Correo](https://github.com/amitmerchant1990/correo) - A menubar/taskbar Gmail App for Windows and macOS
 
 ## License
 
@@ -118,7 +107,5 @@ MIT
 
 ---
 
-> [amitmerchant.com](https://www.amitmerchant.com) &nbsp;&middot;&nbsp;
-> GitHub [@amitmerchant1990](https://github.com/amitmerchant1990) &nbsp;&middot;&nbsp;
-> Twitter [@amit_merchant](https://twitter.com/amit_merchant)
+> GitHub [@chatty-go](https://github.com/chatty-go) &nbsp;&middot;&nbsp;
 
