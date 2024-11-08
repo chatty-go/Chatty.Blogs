@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121.
+-->
+<Project>
+  <PropertyGroup>
+    <_PublishTargetUrl>F:\Chatty-Go\OpenSource\Chatty.Blogs\src\Chatty.Blogs.Web\bin\Release\net8.0\publish\</_PublishTargetUrl>
+    <History>True|2024-11-05T06:11:46.4120892Z||;True|2024-11-05T13:48:57.1584229+08:00||;True|2024-11-02T16:39:50.5409435+08:00||;True|2024-11-01T16:12:36.4537005+08:00||;True|2024-10-31T11:38:15.4165487+08:00||;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+</Project>

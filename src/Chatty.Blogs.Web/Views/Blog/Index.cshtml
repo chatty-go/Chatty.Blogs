@@ -1,0 +1,239 @@
+﻿@model Chatty.Blogs.Web.ViewModels.BlogIndexViewModel
+@inject IViewLocalizer L
+@{
+    ViewData["Title"] = @L["Page_Title"];
+}
+
+<style>
+    .filters{
+        margin-bottom:2rem;
+    }
+
+    .filter-item{
+
+    }
+
+    .filter-close{
+        display: inline-block;
+        margin-left: 12px;
+    }
+</style>
+
+<section class="page-header">
+    <div class="container-xl">
+        <div class="text-center">
+            <h1 class="mt-0 mb-2">@L["Page_Title"]</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center mb-0">
+                    <li class="breadcrumb-item"><a href="#">@L["Page_Home"]</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">@L["Page_Title"]</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<!-- section main content -->
+<section class="main-content">
+    <div class="container-xl">
+        @if (Model.Filter != null)
+        {
+            <div class="filters">
+                @L["Page_Fitler"]：
+                <a href="@Url.Action("Index", "Blog")" class="btn btn-outline-primary filter-item" title="点击清除过滤">@Model.Filter?.Name (@Model.Filter?.Count)<i class="filter-close">&times;</i></a>
+            </div>
+        }
+        
+        <div class="row gy-4">
+
+            <div class="col-lg-8">
+
+                <div class="row gy-4">
+
+                    @foreach (var item in Model.Articles)
+                    {
+                        <div class="col-sm-6">
+                            <!-- post -->
+                            <div class="post post-ellipsis post-grid rounded bordered">
+                                <div class="thumb top-rounded">
+                                    <a href="@Url.Action("Detail", "Blog", new { id = item.RowId })">
+                                        <div class="inner">
+                                            <img src="@Url.Content(item.CoverUrl)" alt="post-title" />
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="details">
+                                    <h5 class="post-title mb-3 mt-3" title="@item.Title"><a href="@Url.Action("Detail", "Blog", new { id = item.RowId })">@item.Title</a></h5>
+                                    <p class="excerpt mb-0">@item.Quote</p>
+                                </div>
+                                <div class="post-bottom clearfix d-flex align-items-center">
+                                    <ul class="meta list-inline mb-0">
+                                        <li class="list-inline-item created-date" data-time="@item.CreatedDate"></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.Total == 0)
+                    {
+                        <div class="col-md-12">
+                            <div class="text-center">
+                                <img src="@Url.Content("~/admin/svg/icon-empty.svg")" alt="no empty" />
+                                <p class="mt-1">@L["Page_Post_Empty"]</p>
+                            </div>
+                        </div>
+                    }
+
+                </div>
+
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        @for(int i=1;i<=Model.Pages;i++){
+                            if (i == Model.Page)
+                            {
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link">@i</span>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Index","Blog",new { page = i})">@i</a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </nav>
+
+            </div>
+            <div class="col-lg-4">
+
+                <!-- sidebar -->
+                <div class="sidebar">
+
+                    <!-- widget categories -->
+                    <div class="widget rounded">
+                        <div class="widget-header text-center">
+                            <h3 class="widget-title">@L["Page_Sidebar_Category"]</h3>
+                            <img src="~/images/wave.svg" class="wave" alt="wave" />
+                        </div>
+                        <div class="widget-content">
+                            <ul class="list">
+                                @foreach (var item in Model.Categories)
+                                {
+                                    <li><a href="@Url.Action("Index","Blog",new { cateid=item.RowId})">@item.Name</a><span>(@item.Count)</span></li>
+                                }
+                            </ul>
+                        </div>
+
+                    </div>
+
+                    <!-- widget newsletter -->
+                    <div class="widget rounded">
+                        <div class="widget-header text-center">
+                            <h3 class="widget-title">Newsletter</h3>
+                            <img src="~/images/wave.svg" class="wave" alt="wave" />
+                        </div>
+                        <div class="widget-content">
+                            <span class="newsletter-headline text-center mb-3">Join 70,000 subscribers!</span>
+                            <form>
+                                <div class="mb-2">
+                                    <input class="form-control w-100 text-center" placeholder="Email address…" type="email">
+                                </div>
+                                <button class="btn btn-default btn-full" type="submit">Sign Up</button>
+                            </form>
+                            <span class="newsletter-privacy text-center mt-3">By signing up, you agree to our <a href="#">Privacy Policy</a></span>
+                        </div>
+                    </div>
+
+                    <!-- widget tags -->
+                    <div class="widget rounded">
+                        <div class="widget-header text-center">
+                            <h3 class="widget-title">@L["Page_Tag_Cloud"]</h3>
+                            <img src="~/images/wave.svg" class="wave" alt="wave" />
+                        </div>
+                        <div class="widget-content">
+                            @foreach (var item in Model.TagCloudList)
+                            {
+                                <a href="@Url.Action("Tags","Blog",new {tag=item.Tags})" class="tag"># @item.Tags (@item.Count)</a>
+                            }
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+@section Scripts{
+    
+    <script src="~/plugins/dayjs/dayjs.min.js"></script>
+    <script src="~/plugins/dayjs/plugin/istoday.js"></script>
+    <script src="~/plugins/dayjs/plugin/issameorafter.js"></script>
+
+    <script>
+
+        // Dayjs Guide:https://dayjs.fenxianglu.cn/
+        dayjs.extend(dayjs_plugin_isToday);
+        dayjs.extend(dayjs_plugin_isSameOrAfter);
+
+        function Page() {
+            
+            this.init();
+
+        }
+
+        Page.prototype = {
+            init: function () {
+                var self = this;
+
+                this.renderTime();
+                this.bindEvent();
+            },
+            bindEvent: function () {
+                var self = this;
+
+            },
+            formatDate: function (time) {
+                var eventDate = dayjs(time);
+
+                var formattedDate;
+
+                if (eventDate.isToday()) {
+                    // 如果是今天，则显示时分
+                    formattedDate = eventDate.format('HH:mm');
+                } else if (eventDate.isSame(dayjs(), 'year')) {
+                    // 如果是今年内，则显示月日
+                    formattedDate = eventDate.format('MM-DD');
+                } else {
+                    // 如果是去年或更早，则显示年月日
+                    formattedDate = eventDate.format('YYYY-MM-DD');
+                }
+
+                return formattedDate;
+            },
+            renderTime: function () {
+                var self = this;
+
+                $('.created-date').each(function () {
+                    var $this = $(this);
+                    var time = $this.data('time');
+
+                    var formattedDate = self.formatDate(time);
+
+                    $this.text(formattedDate);
+                });
+            }
+        }
+
+        $(function () {
+            new Page(); // entry
+        });
+
+    </script>
+}

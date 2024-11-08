@@ -1,0 +1,718 @@
+﻿@inject IViewLocalizer L
+@model Chatty.Blogs.Web.Areas.Admin.ViewModels.SettingIndexViewModel
+@{
+    ViewData["Title"] = "设置";
+}
+
+<link href="~/admin/plugins/cropper/cropper.css" rel="stylesheet" />
+
+<style>
+    .img-container img {
+        max-width: 100%;
+    }
+    .sr-only{
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        border: 0;
+        left: 0;
+        top: 0;
+        z-index: 2;
+        opacity: 0;
+    }
+</style>
+
+<div class="page-header">
+    <h2>@L["Page_Title"]</h2>
+</div>
+
+<div class="page-body mb-4">
+
+    <div class="nav nav-pills mb-4 mt-4" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+        <a class="nav-item nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab"
+           aria-controls="v-pills-home" aria-selected="true">@L["Page_Tab_Account"]</a>
+        <a class="nav-item nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-messages"
+           role="tab" aria-controls="v-pills-messages" aria-selected="false">@L["Page_Tab_Security"]</a>
+        <a class="nav-item nav-link" id="v-pills-seo-tab" data-toggle="pill" href="#v-pills-seo" role="tab"
+           aria-controls="v-pills-seo" aria-selected="false">@L["Page_Tab_SEO"]</a>
+        <a class="nav-item nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-settings"
+           role="tab" aria-controls="v-pills-settings" aria-selected="false">@L["Page_Tab_Social"]</a>
+        <a class="nav-item nav-link" id="v-pills-author-tab" data-toggle="pill" href="#v-pills-author"
+           role="tab" aria-controls="v-pills-author" aria-selected="false">@L["Page_Tab_Author"]</a>
+        <a class="nav-item nav-link" id="v-pills-copyright-tab" data-toggle="pill" href="#v-pills-copyright"
+           role="tab" aria-controls="v-pills-copyright" aria-selected="false">@L["Page_Tab_Copyright"]</a>
+        <a class="nav-item nav-link" id="v-pills-contact-tab" data-toggle="pill" href="#v-pills-contact"
+           role="tab" aria-controls="v-pills-contact" aria-selected="false">@L["Page_Tab_Contact"]</a>
+    </div>
+    <div class="tab-content" id="v-pills-tabContent">
+        <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
+            <div class="content-title">
+                <h4>@L["Page_Tab_Account"]</h4>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <form id="formProfile">
+                        @Html.AntiForgeryToken()
+                        <div class="d-flex mb-3">
+                            <figure class="me-3">
+                                <img width="80" id="img_avatar" class="rounded-pill" src="@Model.User?.Avatar" alt="user avatar">
+                            </figure>
+                            <div>
+                                <p>@Model.User?.UserName</p>
+                                <div class="position-relative d-inline-flex">
+                                    <button type="button" class="btn btn-outline-primary me-2">@L["Page_Change_Avatar"]</button>
+                                    <input accept="image/png, image/jpeg" type="file" id="upload_avatar" class="sr-only" />
+                                    <input type="hidden" value="@Model.User?.Avatar" name="avatar" />
+                                </div>
+                                <button type="button" id="btnResetAvatar" class="btn btn-outline-danger">@L["Page_Remove_Avatar"]</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>@L["Page_Form_Model_Username"]</label>
+                                    <input type="text" class="form-control" name="username" readonly value="@Model.User?.UserName">
+                                </div>
+                                <div class="form-group">
+                                    <label>@L["Page_Form_Model_Name"]</label>
+                                    <input type="text" class="form-control" name="nickname" value="@Model.User?.Nickname">
+                                </div>
+                                <div class="form-group">
+                                    <label>@L["Page_Form_Model_Email"]</label>
+                                    <input type="text" class="form-control" name="email" value="@Model.User?.Email">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>@L["Page_Form_Model_Role"]</label>
+                                    <select class="form-control" disabled>
+                                        <!option @(Model.User?.Role == "Administrator" ? "selected" : "") value="Administrator">Administrator</!option>
+                                        <!option @(Model.User?.Role == "User" ? "selected" : "") value="User">User</!option>
+                                        <!option @(Model.User?.Role == "Visitor" ? "selected" : "") value="Visitor">Visitor</!option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>@L["Page_Form_Model_Status"]</label>
+                                    <select class="form-control" disabled>
+                                        <!option value="" @(Model.User?.Role == "Active" ? "selected" : "")>Active</!option>
+                                        <!option value="" @(Model.User?.Role == "Blocked" ? "selected" : "")>Blocked</!option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="action mt-2">
+                            <button class="btn btn-primary" type="submit">@L["Page_Form_Action_SaveChange"]</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!--Security Setting-->
+        <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">
+            <div class="content-title">
+                <h4>@L["Page_Tab_Security_Change_Password"]</h4>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <form id="formChangePassword">
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>@L["Page_Form_Model_Username"]</label>
+                                    <input type="text" required value="@Context.User.Identity?.Name" name="UserName" placeholder="" readonly class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label>@L["Page_Form_Model_OldPassword"]</label>
+                                    <input type="password" required name="Password" placeholder="" class="form-control" /> 
+                                </div>
+                                <div class="form-group">
+                                    <label>@L["Page_Form_Model_NewPassword"]</label>
+                                    <input type="password" required name="NewPassword" placeholder="" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label>@L["Page_Form_Model_NewPasswordRepeat"]</label>
+                                    <input type="password" required name="ConfirmPassword" placeholder="" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">@L["Page_Form_Action_SaveChange"]</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!--SEO-->
+        <div class="tab-pane fade" id="v-pills-seo" role="tabpanel" aria-labelledby="v-pills-seo-tab">
+            <div class="content-title">
+                <h4>@L["Page_Tab_SEO"]</h4>
+            </div>
+
+            <div class="alert alert-primary" role="alert">
+               填写良好的SEO信息有助于提高网站的曝光和排名。
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <form id="formSeo">
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>首页标题(Title)</label>
+                                    <input type="text" name="homeTitle" class="form-control" value="@Model.SiteConfig?.HomeTitle">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>元描述(Meta Description)</label>
+                                    <textarea type="text" name="metaDescription" style="height:80px;" class="form-control">@Model.SiteConfig?.MetaDescription</textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>关键词(Keywords)</label>
+                                    <textarea type="text" name="keywords" style="height:80px;" class="form-control">@Model.SiteConfig?.Keywords</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" type="submit">@L["Page_Form_Action_SaveChange"]</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
+            <div class="content-title">
+                <h4>@L["Page_Tab_Social"]</h4>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <form id="formSocial">
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Twitter</label>
+                                    <input type="text" name="SocialTwitter" class="form-control" value="@Model.SiteConfig?.SocialTwitter" placeholder="" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Facebook</label>
+                                    <input type="text" class="form-control" name="SocialFacebook" value="@Model.SiteConfig?.SocialFacebook" placeholder="" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Instagram</label>
+                                    <input type="text" value="@Model.SiteConfig?.SocialInstagram" name="SocialInstagram" class="form-control" placeholder="" />
+                                </div>
+                                <div class="form-group">
+                                    <label>GitHub</label>
+                                    <input type="text" value="@Model.SiteConfig?.SocialGithub" name="SocialGithub" class="form-control" placeholder="" />
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" type="submit">@L["Page_Form_Action_SaveChange"]</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="v-pills-author" role="tabpanel" aria-labelledby="v-pills-author-tab">
+            <div class="content-title">
+                <h4>@L["Page_Tab_Author"]</h4>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <form id="formAuthorAvatar">
+                        @Html.AntiForgeryToken()
+                        <div class="d-flex mb-3">
+                            <figure class="me-3">
+                                <img width="80" id="img_AuthorAvatar" class="rounded-pill" src="@Model.SiteConfig.AuthorAvatar"
+                                     alt="AuthorAvatar">
+                            </figure>
+                            <div>
+                                <p>作者头像</p>
+                                <div class="position-relative d-inline-flex">
+                                    <button type="button" class="btn btn-outline-primary me-2">@L["Page_Change_Avatar"]</button>
+                                    <input accept="image/png, image/jpeg" type="file" id="upload_AuthorAvatar" class="sr-only" />
+                                    <input type="hidden" value="@Model.SiteConfig.AuthorAvatar" name="AuthorAvatar" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>@L["Page_Form_Model_AuthorName"]</label>
+                                    <input type="text" name="AuthorName" class="form-control" value="@Model.SiteConfig.AuthorName">
+                                </div>
+                                <div class="form-group">
+                                    <label>@L["Page_Form_Model_AuthorDesc"]</label>
+                                    <textarea type="text" name="AuthorDesc" style="height:80px;" class="form-control">@Model.SiteConfig.AuthorDesc</textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>@L["Page_Form_Model_AuthorDisplayFlag"]</label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" name="AuthorDisplayFlag" value="1" type="checkbox" id="flexSwitchCheckChecked" @(Model.SiteConfig.AuthorDisplayFlag == 1 ? "checked" : "")>
+                                        <label class="form-check-label" for="flexSwitchCheckChecked">启用后，作者信息将显示在博客文章底部</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="action mt-2">
+                            <button class="btn btn-primary" type="submit" >@L["Page_Form_Action_SaveChange"]</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="v-pills-copyright" role="tabpanel" aria-labelledby="v-pills-copyright-tab">
+            <div class="content-title">
+                <h4>@L["Page_Tab_Copyright"]</h4>
+            </div>
+
+            <div class="alert alert-primary" role="alert">
+                版权声明将显示在博客文章底部
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <form id="formCopyright">
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>版权描述</label>
+                                    <textarea type="text" name="CopyrightDesc" style="height:80px;" class="form-control">@Model.SiteConfig?.CopyrightDesc</textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>版权链接</label>
+                                    <input type="text" name="CopyrightUrl" class="form-control" value="@Model.SiteConfig?.CopyrightUrl">
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" type="submit">@L["Page_Form_Action_SaveChange"]</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="v-pills-contact" role="tabpanel" aria-labelledby="v-pills-contact-tab">
+            <div class="content-title">
+                <h4>@L["Page_Tab_Contact"]</h4>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <form id="formContact">
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>手机号码</label>
+                                    <input type="text" name="ContactPhone" class="form-control" value="@Model.SiteConfig?.ContactPhone" placeholder="" />
+                                </div>
+                                <div class="form-group">
+                                    <label>联系地址</label>
+                                    <input type="text" value="@Model.SiteConfig?.ContactAddress" name="ContactAddress" class="form-control" placeholder="" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>邮箱</label>
+                                    <input type="text" class="form-control" name="ContactEmail" value="@Model.SiteConfig?.ContactEmail" placeholder="" />
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" type="submit">@L["Page_Form_Action_SaveChange"]</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade no-border" id="cropModal"  tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width:800px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">裁剪头像</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="img-container">
+                            <img id="previewImage" src="">
+                        </div>
+
+                        <div class="mt-4">
+                            <div class="btn-group">
+                                <a href="#" class="btn btn-primary action" data-method="zoom" data-option="0.1" title="Zoom In"><i class="ti-zoom-in"></i></a>
+                                <a href="#" class="btn btn-primary action" data-method="zoom" data-option="-0.1" title="Zoom Out"><i class="ti-zoom-out"></i></a>
+                            </div>
+
+                            <div class="btn-group">
+                                <a href="#" class="btn btn-primary action" data-method="rotate" data-option="-45" title="Rotate Left"><i class="ti-back-left"></i></a>
+                                <a href="#" class="btn btn-primary action" data-method="rotate" data-option="45" title="Rotate Right"><i class="ti-back-right"></i></a>
+                            </div>
+
+                            <div class="btn-group">
+                                <a href="#" class="btn btn-primary action" data-method="scaleX" data-option="-1" title="Flip Horizontal"><i class="ti-arrows-horizontal"></i></a>
+                                <a href="#" class="btn btn-primary action" data-method="scaleY" data-option="-1" title="Flip Vertical"><i class="ti-arrows-vertical"></i></a>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="docs-preview clearfix">
+                            <div class="img-preview preview-lg"></div>
+                            <div class="img-preview preview-md"></div>
+                            <div class="img-preview preview-sm"></div>
+                            <div class="img-preview preview-xs"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="crop">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/admin/plugins/cropper/cropper.js"></script>
+
+    <script>
+
+        function Page(){
+            this.rowId = '@Model.SiteConfig?.RowId';
+            this.$cropModal = $('#cropModal');
+            this.$previewImage = $('#previewImage');
+            this.cropper = null;
+            this.cropSuccess = null; // fn
+
+            this.init();
+        }
+
+        Page.prototype = {
+            init: function () { 
+                
+                this.bindEvent();
+            },
+            bindEvent: function () {
+                var self=this;
+
+                $('[data-method]').on('click', function () { 
+                    var data = $(this).data();
+
+                    console.log('data',data)
+                    self.cropper[data.method] && self.cropper[data.method](data.option);
+
+                    switch(data.method){
+                        case 'scaleX':
+                        case 'scaleY':
+                            $(this).data('option', -data.option);
+                            break;
+                    }
+                });
+
+                var triggerTabList = [].slice.call(document.querySelectorAll('#v-pills-tab>a'))
+                triggerTabList.forEach(function (triggerEl) {
+                    var tabTrigger = new bootstrap.Tab(triggerEl)
+
+                    triggerEl.addEventListener('click', function (event) {
+                        event.preventDefault()
+                        tabTrigger.show();
+
+                        console.log('tab切换', this.name)
+                    })
+                });
+
+                // Reset avatar
+                $('#btnResetAvatar').on('click', function () {
+                    var url = '@Url.Content("~/admin/img/default-avatar.png")';
+                    $('[name=avatar]').val(url);
+                    $('#img_avatar').attr('src', url);
+                });
+
+                // Submit Change Social
+                $('#formContact').on('submit', function (e) {
+
+                    e.preventDefault();
+
+                    var formData = $(this).serializeObject();
+                    formData.RowId = self.rowId;
+
+                    $.post('@Url.Action("UpdateContact", "Setting")', formData, function (res) {
+                        if (res.code === 1) {
+                            cocoMessage.success('保存成功');
+                        } else {
+                            cocoMessage.error(res.msg);
+                        }
+                    });
+
+                    return false;
+                });
+
+                // Submit Change Social
+                $('#formSocial').on('submit', function (e) { 
+                
+                    e.preventDefault();
+
+                    var formData = $(this).serializeObject();
+                    formData.RowId = self.rowId;
+
+                    $.post('@Url.Action("UpdateSocial", "Setting")', formData, function (res) {
+                        if (res.code === 1) {
+                            cocoMessage.success('保存成功');
+                        } else {
+                            cocoMessage.error(res.msg);
+                        }
+                    });
+
+                    return false;
+                });
+
+                // Submit Change Profile
+                $('#formProfile').on('submit', function (e) { 
+                    e.preventDefault();
+
+                    var formData = $(this).serializeObject();
+
+                    $.post('@Url.Action("ChangeProfile", "Setting")', formData, function (res) {
+                        if (res.code === 1) {
+                            cocoMessage.success('修改成功');
+                        } else {
+                            cocoMessage.success(res.msg);
+                        }
+                    });
+
+                    return false;
+
+                });
+
+                // Submit Change Password
+                $('#formChangePassword').on('submit', function (e) {
+                    e.preventDefault();
+
+                    var formData = $(this).serializeObject();
+
+                    if (formData.NewPassword !== formData.ConfirmPassword) {
+                        cocoMessage.error('两次输入的密码不一致');
+                        return;
+                    }
+
+                    $.post('@Url.Action("ChangePassword", "Setting")', formData, function (res) {
+                        if (res.code === 1) {
+                            cocoMessage.success('修改密码成功，即将重新登录...');
+                            setTimeout(function () { 
+                                window.location.replace('@Url.Action("Index", "Login")');
+                            },1500);
+                        } else {
+                            cocoMessage.error(res.msg);
+                        }
+                    });
+
+                    return false;
+                });
+
+
+                // User Avatar Upload
+                $('#upload_avatar').on('change', function (e) {
+                    var file = e.target.files[0];
+
+                    self.loadFile(file, function (url) {
+                        self.renderCrop(url)
+                        self.cropSuccess = function (url) {
+                            $('[name=avatar]').val(url);
+                            $('#img_avatar').attr('src', url);
+                        }
+                    })
+                });
+
+                // Author Avatar Upload
+                $('#upload_AuthorAvatar').on('change', function (e) {
+                    var file = e.target.files[0];
+
+                    self.loadFile(file,function(url){
+                        self.renderCrop(url)
+                        self.cropSuccess = function(url){
+                            $('[name=AuthorAvatar]').val(url);
+                            $('#img_AuthorAvatar').attr('src', url);
+                        }
+                    })
+                });
+
+                // Submit Author Avatar Form
+                $('#formAuthorAvatar').on('submit', function (e) {
+                    e.preventDefault();
+
+                    var formData = $(this).serializeObject();
+                    formData.RowId = self.rowId;
+
+                    $.post('@Url.Action("UpdateAuthor", "Setting")', formData, function (res) {
+                        if (res.code === 1) {
+                            cocoMessage.success('保存成功');
+                        }else{
+                            cocoMessage.error(res.msg);
+                        }
+                    });
+
+                    return false;
+                });
+
+                // Submit Copyright Form
+                $('#formCopyright').on('submit', function(e){
+                    e.preventDefault();
+
+                    var formData = $(this).serializeObject();
+                    formData.RowId = self.rowId;
+
+                    $.post('@Url.Action("UpdateCopyright","Setting")', formData, function (res) {
+                        if (res.code === 1) {
+                            cocoMessage.success('保存成功');
+                        } else {
+                            cocoMessage.error(res.msg);
+                        }
+                    });
+
+                    return false;
+                });
+
+                // Submit Copyright Form
+                $('#formSeo').on('submit', function(e){
+                    e.preventDefault();
+
+                    var formData = $(this).serializeObject();
+                    formData.RowId = self.rowId;
+
+                    $.post('@Url.Action("UpdateSeo","Setting")', formData, function (res) {
+                        if (res.code === 1) {
+                            cocoMessage.success('保存成功');
+                        } else {
+                            cocoMessage.error(res.msg);
+                        }
+                    });
+
+                    return false;
+                });
+
+                self.$cropModal.on('shown.bs.modal', function () {
+                    var previews = document.querySelectorAll('.img-preview');
+
+                    self.cropper = new Cropper(self.$previewImage[0], {
+                        aspectRatio: 1,
+                        preview: '.img-preview',
+                        cropmove: function (e) {
+                            console.log(e.type, e.detail.action);
+                        },
+                        crop: function (event) {
+
+                        }
+                    });
+                }).on('hidden.bs.modal', function () {
+                    self.cropper && self.cropper.destroy();
+                    self.cropper = null;
+                });
+
+                $('#crop').on('click', function () {
+                  
+                    var canvas;
+
+                    self.$cropModal.modal('hide');
+
+                    if (self.cropper) {
+                        canvas = self.cropper.getCroppedCanvas({
+                            width: 160,
+                            height: 160,
+                        });
+
+                        
+
+                        self.$previewImage.attr('src', canvas.toDataURL());
+                        
+                        canvas.toBlob(function (blob) {
+                            var formData = new FormData();
+
+                            formData.append('formFile', blob, 'avatar.jpg');
+                            $.ajax('@Url.Action("Index", "Upload")', {
+                                method: 'POST',
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+
+                                xhr: function () {
+                                    var xhr = new XMLHttpRequest();
+
+                                    xhr.upload.onprogress = function (e) {
+                                        var percent = '0';
+                                        var percentage = '0%';
+
+                                        if (e.lengthComputable) {
+                                            percent = Math.round((e.loaded / e.total) * 100);
+                                            percentage = percent + '%';
+                                            console.log('percentage', percentage);
+                                        }
+                                    };
+
+                                    return xhr;
+                                },
+
+                                success: function (res) {
+                                   if(res.code===1){
+                                       self.cropSuccess && self.cropSuccess(res.data.url);
+                                   }
+                                },
+
+                                error: function () {
+                                  
+                                },
+
+                                complete: function () {
+                                   
+                                },
+                            });
+                        });
+                    }
+                });
+
+            },
+            loadFile: function (file,callback) {
+                if (URL) {
+                    var url = URL.createObjectURL(file);
+                    callback && callback(url);
+                } else if (FileReader) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        var url = reader.result;
+                        callback && callback(url);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            },
+            renderCrop:function(url){
+                this.$previewImage.attr('src',url);
+                this.$cropModal.modal('show');
+            }
+        }
+
+        $(function () { 
+            new Page();
+        });
+
+    </script>
+
+    
+}

@@ -1,0 +1,285 @@
+﻿@inject IViewLocalizer L
+@model Chatty.Blogs.Web.Areas.Admin.ViewModels.CategoryFrontViewModel
+@{
+	ViewData["Title"] = L["Page_Title"];
+}
+
+<div class="page-header">
+	<h1>@L["Page_Title"]</h1>
+</div>
+
+<div class="page-body">
+	<ul class="nav nav-lines mt-6">
+		<li class="nav-item">
+			<a class="nav-link" href="@Url.Action("Index","Category")">@L["Page_Tab_Admin"]</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link active" aria-current="page" href="">@L["Page_Tab_Public"]</a>
+		</li>
+	</ul>
+	<div class="">
+        <div class="mt-4 mb-4">
+			<button type="button" class="btn btn-primary" id="Page_Action_New"><i class="ti-plus"></i>@L["Page_Action_Add"]</button>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+					<th scope="col">#@L["Page_Table_Header_TaxisNo"]</th>
+					<th scope="col">@L["Page_Table_Header_Name"]</th>
+					<th scope="col">@L["Page_Table_Header_Action"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.List)
+                {
+                    <tr data-id="@item.RowId">
+                        <th scope="row">@item.TaxisNo</th>
+                        <td>@item.Name</td>
+                        <td>
+							<button type="button" class="btn btn-link Page_Action_Edit"><i class="ti-pencil"></i>@L["Page_Table_Action_Edit"]</button>
+							<button type="button" class="btn btn-link Page_Action_Delete"><i class="ti-trash"></i>@L["Page_Table_Action_Delete"]</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+	</div>
+</div>
+
+<!--Add Modal-->
+<div class="modal no-border fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="addCategoryModalLabel">@L["Page_Add_Category_Title"]</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form method="post" id="formNewCategory" novalidate action="@Url.Action("Insert","Category")">
+					@Html.AntiForgeryToken()
+					<input type="hidden" value="Front" class="form-control" name="type">
+					<div class="mb-3">
+						<label for="recipient-name" class="col-form-label">@L["Page_Form_Model_Name"]:</label>
+						<input type="text" required class="form-control" name="name">
+					</div>
+					<div class="mb-3">
+						<label for="message-text" class="col-form-label">@L["Page_Form_Model_TaxisNo"]:</label>
+						<input type="number" required class="form-control" name="taxisNo">
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" data-bs-dismiss="modal">@L["Page_Form_Action_Cancel"]</button>
+				<button type="button" class="btn btn-primary" id="Page_Action_New_Submit">@L["Page_Form_Action_Submit"]</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!--Edit Modal-->
+<div class="modal no-border fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="editCategoryModalLabel">@L["Page_Edit_Category_Title"]</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form method="post" id="form_edit_category" novalidate>
+					@Html.AntiForgeryToken()
+					<input type="hidden" value="Front" class="form-control" name="type">
+					<input type="hidden" value="" class="form-control" name="rowId">
+					<div class="mb-3">
+						<label for="recipient-name" class="col-form-label">@L["Page_Form_Model_Name"]:</label>
+						<input type="text" required class="form-control" name="name">
+					</div>
+					<div class="mb-3">
+						<label for="message-text" class="col-form-label">@L["Page_Form_Model_TaxisNo"]:</label>
+						<input type="number" required class="form-control" name="taxisNo">
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" data-bs-dismiss="modal">@L["Page_Form_Action_Cancel"]</button>
+				<button type="button" class="btn btn-primary" id="Page_Action_SaveChange">@L["Page_Form_Action_SaveChange"]</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!--Delete Modal -->
+<div class="modal no-border fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="deleteModalLabel">@L["Page_Delete_Confirm_Title"]</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				@L["Page_Delete_Confirm_Message"]
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" data-bs-dismiss="modal">@L["Page_Form_Action_Cancel"]</button>
+				<button type="button" class="btn btn-primary" id="Page_Action_Delete_Confirm">@L["Page_Form_Action_DeleteConfirm"]</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section Scripts {
+	<script type="text/javascript">
+
+		function Page(){
+
+			this.$addCategoryModal = new bootstrap.Modal(document.getElementById('addCategoryModal'), {
+				keyboard: false
+			});;
+
+			this.$deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'), {
+				keyboard: false
+			});
+
+			this.$editCategoryModal = new bootstrap.Modal(document.getElementById('editCategoryModal'), {
+				keyboard:false
+			});
+
+			this.data = {
+				selectedId:null,
+				selectedNode:null
+			};
+
+			this.init();
+		}
+
+		Page.prototype = {
+			init: function () {
+				var self = this;
+
+				this.bindEvent();
+			},
+			bindEvent:function(){
+				var self=this;
+
+				// Add Event
+				$('#Page_Action_New').on('click', function () {
+					self.$addCategoryModal.show();
+				});
+
+				// Add Form - Submit Event
+				$('#formNewCategory').on('submit', function (e) {
+					e.preventDefault();
+
+					// 获取表单元素
+					var form = e.target;
+
+					// 检查表单是否有效
+					if (!form.checkValidity()) {
+						form.classList.add('was-validated');
+					}else{
+						var formData = $(this).serializeObject();
+
+						$.post("@Url.Action("Insert", "Category")", formData, function (res) {
+							if (res.code === 1) {
+								cocoMessage.success('@L["Page_Ajax_Add_Success"]');
+
+								form.reset();
+								form.classList.remove('was-validated');
+
+								self.$addCategoryModal.hide();
+								setTimeout(function () { window.location.reload(); }, 500);
+
+							} else {
+								cocoMessage.error(res.errorMsg);
+							}
+						}).fail(function () {
+							alert('保存失败');
+						});
+					}
+				});
+
+				// 新增分类表单 - 提交
+				$('#Page_Action_New_Submit').on('click', function (e) {
+					$('#formNewCategory').trigger('submit');
+				});
+
+				// 编辑
+				$('.Page_Action_Edit').on('click', function (e) {
+					self.data.selectedId = $(this).closest('tr').data('id');
+					self.$editCategoryModal.show();
+
+					$.get("@Url.Action("GetById", "Category")", { id: self.data.selectedId }, function (res) {
+						if (res.code === 1) {
+								var rowData = res.data;
+								var $modal = $('#editCategoryModal');
+								$modal.find('[name=name]').val(rowData.name);
+								$modal.find('[name=taxisNo]').val(rowData.taxisNo);
+								$modal.find('[name=rowId]').val(rowData.rowId);
+								$modal.find('[name=type]').val(rowData.type);
+						}else{
+							cocoMessage.error(res.msg);
+						}
+					});
+
+				});
+
+
+				$('#form_edit_category').on('submit', function (e) { 
+					e.preventDefault();
+
+					// 获取表单元素
+					var form = e.target;
+
+					// 检查表单是否有效
+					if (!form.checkValidity()) {
+						form.classList.add('was-validated');
+					} else {
+						var formData = serializeObject('#form_edit_category');
+
+						$.post("@Url.Action("Update", "Category")", formData, function (res) {
+							if (res.code === 1) {
+								cocoMessage.success('@L["Page_Ajax_Update_Success"]');
+								form.reset();
+								form.classList.remove('was-validated');
+								self.$editCategoryModal.hide();
+								setTimeout(function () { window.location.reload(); }, 500);
+							} else {
+								cocoMessage.error(res.msg);
+							}
+						});
+					}
+				});
+
+				// 编辑-确认
+				$('#Page_Action_SaveChange').on('click', function (e) {
+					$('#form_edit_category').trigger('submit');
+				});
+
+
+				// 删除
+				$('.Page_Action_Delete').on('click', function (e) {
+
+					self.data.selectedId = $(this).closest('tr').data('id');
+
+					self.$deleteModal.show();
+				});
+
+				// Delete Confirm
+				$('#Page_Action_Delete_Confirm').on('click', function (e) {
+					$.post("@Url.Action("Delete", "Category")", { id: self.data.selectedId }, function (res) {
+						if (res.code === 1) {
+							cocoMessage.success('@L["Page_Ajax_Delete_Success"]');
+							self.$deleteModal.hide();
+							setTimeout(function () { window.location.reload(); }, 500);
+						}else{
+							cocoMessage.error(res.msg);
+						}
+					});
+				});
+			},
+		}
+
+		new Page();
+
+	</script>
+}

@@ -1,0 +1,624 @@
+﻿@inject IViewLocalizer L
+@inject IHtmlLocalizer<SharedResource> HtmlSharedResource
+@model Chatty.Blogs.Web.Areas.Admin.ViewModels.CategoryIndexViewModel
+
+@{
+	ViewData["Title"] = L["Page_Title"];
+}
+
+<link href="~/plugins/ztree/css/ztreestyle/ztreestyle.css" rel="stylesheet" />
+<link href="~/plugins/ztree/css/outlook.theme.css" rel="stylesheet" />
+
+<style type="text/css">
+	
+		.left-category-menu{
+			border:1px solid #f1f1f1;
+			padding:10px;
+		}
+
+		.left-category-menu .actions .btn{
+		border:none;
+		}
+
+
+	.grid-item {
+		width: 400px;
+		margin-bottom: 10px;
+	}
+
+	.cover-url {
+		height: 200px;
+		background-size: cover;
+		background-position: 50% 50%;
+		background-repeat: no-repeat;
+		background-color: #f1f1f1;
+	}
+
+	.article .card .card-title {
+		font-size: 16px;
+		color: #353535;
+		font-weight: 400;
+		display: block;
+	}
+
+	.article .card .card-text {
+		font-size: 14px;
+		color: #7e8081;
+	}
+
+	.grid .grid-item:hover .grid-item__icon-btn {
+		opacity: 1;
+	}
+
+	.grid-item__icon-btn {
+		position: absolute;
+		right: 10px;
+		top: 10px;
+		opacity: 0;
+	}
+
+	.article .card-link {
+		background: #fff;
+		width: 30px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 30px;
+		border-radius: 30px;
+		box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.2);
+	}
+
+		.article .card-link.publish {
+			width: 74px;
+		}
+
+	.article .grid-item .status {
+		position: absolute;
+		top: 20px;
+		left: 20px;
+		z-index: 10;
+	}
+
+	.nodata{
+		text-align: center;
+		color: gray;
+		padding-top: 100px;
+	}
+</style>
+
+<div class="page-header">
+	<h1>@L["Page_Title"]</h1>
+</div>
+
+<div class="page-body">
+	<ul class="nav nav-lines mt-6">
+		<li class="nav-item">
+			<a class="nav-link active" aria-current="page" href="#">@L["Page_Tab_Admin"]</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" href="@Url.Action("Front","Category")">@L["Page_Tab_Public"]</a>
+		</li>
+	</ul>
+	<div class="d-flex mt-4">
+		<div class="left-category-menu">
+
+			<div class="btn-group actions" role="group">
+				<button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+					<i class="ti-plus"></i>
+					@L["Page_Action_Add"]
+				</button>
+				<button type="button" class="btn btn-outline-primary" id="btnEdit"><i class="ti-pencil"></i>@L["Page_Action_Edit"]</button>
+				<button type="button" class="btn btn-outline-primary" id="btnDelete"><i class="ti-trash"></i>@L["Page_Action_Delete"]</button>
+			</div>
+
+			<form class="mb-2 mt-2 form-search">
+				<div class="input-group">
+					<div class="input-group-prepend">
+						<button class="btn" type="button">
+							<i class="ti-search"></i>
+						</button>
+					</div>
+					<input type="text" id="searchMenu" class="form-control-search form-control form-control-sm" placeholder="@L["Page_Search_Message"]">
+					
+				</div>
+			</form>
+			<ul id="treeDemo" class="ztree"></ul>
+		</div>
+		<div class="flex-fill" style="padding: 10px 20px;">
+			<div class="d-flex justify-content-between align-items-center">
+				<nav aria-label="breadcrumb">
+					<ol class="breadcrumb" id="breadcrumb_category_selected">
+						<li class="breadcrumb-item active" aria-current="page">@L["Page_Path_All"]</li>
+					</ol>
+				</nav>
+
+				<div class="right-actions">
+					<a href="@Url.Action("NewPost","Blog")" data-href="@Url.Action("NewPost", "Blog")" target="_blank" id="Page_Action_NewPost" class="btn btn-primary">@L["Page_Action_New_Post"]</a>
+				</div>
+			</div>
+			<div>
+				<div class="article grid">
+
+				</div>
+
+				<div class="nodata" id="nodata">
+                    <div>
+						<img src="~/admin/svg/nomore.svg" />
+						<p class="mt-2">@L["Page_List_Empty"]</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!--Add Modal-->
+<div class="modal no-border fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="addCategoryModalLabel">@L["Page_New_Category_Title"]</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form method="post" id="formNewCategory" action="@Url.Action("Insert","Category")">
+					@Html.AntiForgeryToken()
+					<input type="hidden" value="Back" class="form-control" name="type">
+					<div class="mb-3">
+						<label for="recipient-name" class="col-form-label">@L["Page_Form_Model_Name"]:</label>
+						<input type="text" required class="form-control" name="name" >
+					</div>
+					<div class="mb-3">
+						<label for="message-text" class="col-form-label">@L["Page_Form_Model_TaxisNo"]:</label>
+						<input type="number" required class="form-control" name="taxisNo">
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" data-bs-dismiss="modal">@L["Page_Form_Action_Cancel"]</button>
+				<button type="button" class="btn btn-primary" id="btn_submit">@L["Page_Form_Action_Submit"]</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!--Edit Modal-->
+<div class="modal no-border fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="editCategoryModalLabel">@L["Page_Edit_Category_Title"]</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form method="post" id="form_edit_category" action="@Url.Action("Insert","Category")">
+					@Html.AntiForgeryToken()
+					<input type="hidden" value="Back" class="form-control" name="type">
+					<input type="hidden" value="" class="form-control" name="rowId">
+					<input type="hidden" value="" class="form-control" name="parentId">
+					<div class="mb-3">
+						<label for="recipient-name" class="col-form-label">@L["Page_Form_Model_Name"]:</label>
+						<input type="text" required class="form-control" name="name" >
+					</div>
+					<div class="mb-3">
+						<label for="message-text" class="col-form-label">@L["Page_Form_Model_TaxisNo"]:</label>
+						<input type="number" required class="form-control" name="taxisNo">
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" data-bs-dismiss="modal">@L["Page_Form_Action_Cancel"]</button>
+				<button type="button" class="btn btn-primary" id="btnSaveChange">@L["Page_Form_Action_SaveChange"]</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!--Delete Modal -->
+<div class="modal no-border fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">确认</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        确认删除该分类么？
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" id="btnDeleteConfirm">确认</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+	<script src="~/plugins/dayjs/dayjs.min.js"></script>
+	<script src="~/plugins/dayjs/plugin/istoday.js"></script>
+	<script src="~/plugins/dayjs/plugin/issameorafter.js"></script>
+	<script src="~/plugins/masonry/masonry.pkgd.min.js"></script>
+	<script src="~/plugins/arttemplate/template.js"></script>
+    <script src="~/plugins/ztree/js/jquery.ztree.core.min.js"></script>
+    <script src="~/plugins/ztree/js/jquery.ztree.exhide.min.js"></script>
+	<script src="~/plugins/ztree/js/fuzzysearch.js"></script>
+	<script type="text/javascript">
+
+		dayjs.extend(dayjs_plugin_isToday);
+		dayjs.extend(dayjs_plugin_isSameOrAfter);
+
+		function Page(){
+
+			this.nomore = false;
+            this.loading = false;
+            this.page = 0;
+            this.$grid = null;
+
+			this.$addCategoryModal = new bootstrap.Modal(document.getElementById('addCategoryModal'), {
+				keyboard: false
+			});
+
+			this.$editCategoryModal = new bootstrap.Modal(document.getElementById('editCategoryModal'), {
+				keyboard: false
+			});
+
+			this.$deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'), {
+				keyboard: false
+			});
+
+			this.$nodata = $('#nodata');
+
+			this.data = {
+				selectedId:null,
+				selectedNode:null
+			};
+
+			this.init();
+		}
+
+		Page.prototype = {
+			init: function () {
+				var self = this;
+
+				template.helper('formatDate', function (time) {
+					var formattedDate = self.formatDate(time);
+					return '更新于 ' + formattedDate;
+				});
+
+				this.$grid = $('.grid').masonry({
+                    itemSelector: '.grid-item',
+                    columnWidth: 200,
+                    gutter: 10
+                });
+
+				this.renderTree();
+
+				this.bindEvent();
+			},
+			bindEvent:function(){
+				var self=this;
+
+				// 新增分类表单 - 提交事件
+				$('#formNewCategory').on('submit', function (e) {
+					e.preventDefault();
+
+					// 获取表单元素
+					var form = e.target;
+
+					// 检查表单是否有效
+					if (!form.checkValidity()) {
+						form.classList.add('was-validated');
+					}else{
+						var formData = $(this).serializeObject();
+
+						var params = $.extend({}, formData);
+						params.parentId = self.data.selectedId;
+
+						$.post("@Url.Action("Insert", "Category")", params, function (res) {
+							if (res.code === 1) {
+								cocoMessage.success('保存成功');
+
+								form.reset();
+								form.classList.remove('was-validated');
+
+								self.$addCategoryModal.hide();
+								setTimeout(function () { window.location.reload(); }, 500);
+
+							} else {
+								cocoMessage.error(res.errorMsg);
+							}
+						}).fail(function () {
+							alert('保存失败');
+						});
+					}
+				});
+
+				// 新增分类表单 - 提交
+				$('#btn_submit').on('click', function (e) {
+					$('#formNewCategory').trigger('submit');
+				});
+
+				// 编辑
+				$('#btnEdit').on('click', function (e) {
+
+					if(!self.data.selectedId){
+						cocoMessage.error('请先选择分类');
+						return;
+					}
+
+					var rowData = self.data.selectedNode;
+
+					var $modal = $('#editCategoryModal');
+
+
+					$modal.find('[name=name]').val(rowData.name);
+					$modal.find('[name=taxisNo]').val(rowData.taxisNo);
+					$modal.find('[name=rowId]').val(rowData.rowId);
+					$modal.find('[name=parentId]').val(rowData.parentId);
+
+					var $isPublic = $modal.find('[name=isPublic]');
+
+					if (rowData.isPublic==1){
+						$isPublic.prop('checked', true);
+					}else{
+						$isPublic.removeAttr('checked');
+					}
+
+					self.$editCategoryModal.show();
+
+				});
+
+				$('#form_edit_category').on('submit', function (e) {
+					e.preventDefault();
+
+					// 获取表单元素
+					var form = e.target;
+
+					// 检查表单是否有效
+					if (!form.checkValidity()) {
+						form.classList.add('was-validated');
+					}else{
+						var formData = $('#form_edit_category').serializeObject();
+
+						var params = $.extend({}, formData);
+						params.parentId = self.data.selectedNode.parentId;
+						params.rowId = self.data.selectedId;
+
+						$.post("@Url.Action("Update", "Category")", params, function (res) {
+							if (res.code === 1) {
+								cocoMessage.success('修改成功');
+								form.reset();
+								form.classList.remove('was-validated');
+
+								self.$editCategoryModal.hide();
+								setTimeout(function () { window.location.reload(); }, 500);
+							} else {
+								cocoMessage.error(res.msg);
+							}
+						});
+					}
+				});
+
+				// 编辑-确认
+				$('#btnSaveChange').on('click', function (e) {
+					$('#form_edit_category').trigger('submit');
+				});
+
+
+				// 删除
+				$('#btnDelete').on('click', function (e) {
+
+					if(!self.data.selectedId){
+						cocoMessage.info('请先选择分类');
+						return;
+					}
+
+					if(self.data.selectedNode.isParent){
+						cocoMessage.warning('该分类存在下级，请先删除下级');
+						return;
+					}
+
+					self.$deleteModal.show();
+				});
+
+				// Delete Confirm
+				$('#btnDeleteConfirm').on('click', function (e) {
+					$.post("@Url.Action("Delete", "Category")", { id: self.data.selectedId }, function (res) {
+						if (res.code === 1) {
+							cocoMessage.success('删除成功');
+							self.$deleteModal.hide();
+							setTimeout(function () { window.location.reload(); }, 500);
+						}else{
+							cocoMessage.error(res.msg);
+						}
+					});
+				});
+			},
+			loadMore: function () {
+				var self = this;
+
+				if (this.loading || this.nomore) { return; }
+
+				this.page++;
+
+				$.ajax({
+					url: '@Url.Action("LoadArticleList", "Category")',
+					type: 'GET',
+					dataType: 'json',
+					data: {
+						page: this.page,
+						limit: 30,
+						categoryId: self.data.selectedId
+					},
+					success: function (res) {
+						if (res.code === 1) {
+
+							if(res.data.total>0){
+								var html = template('blog-item-template', res.data.list);
+								var $html = $(html);
+
+								self.$grid.append($html).masonry('appended', $html);
+
+								self.$nodata.hide();
+							}else{
+								self.$grid.html('').masonry('layout');
+								self.$nodata.show();
+							}
+							
+						}
+					},
+					error: function (xhr, status, error) { }
+				})
+			},
+			formatDate: function (time) {
+				var eventDate = dayjs(time);
+
+				var formattedDate;
+
+				if (eventDate.isToday()) {
+					// 如果是今天，则显示时分
+					formattedDate = eventDate.format('HH:mm');
+				} else if (eventDate.isSame(dayjs(), 'year')) {
+					// 如果是今年内，则显示月日
+					formattedDate = eventDate.format('MM月DD日');
+				} else {
+					// 如果是去年或更早，则显示年月日
+					formattedDate = eventDate.format('YYYY-MM-DD');
+				}
+
+				return formattedDate;
+			},
+			renderTime: function () {
+				var self = this;
+
+				$('.created-date').each(function () {
+					var $this = $(this);
+					var time = $this.data('time');
+
+					var formattedDate = self.formatDate(time);
+
+					$this.text('更新于 ' + formattedDate);
+				});
+			},
+			setHref:function(id){
+				var $newpost = $('#Page_Action_NewPost');
+				var href = $newpost.data('href');
+				$newpost.attr('href', href + '?cid=' + id);
+			},
+			renderTree: function () {
+				var self=this;
+
+				var curMenu = null, zTree_Menu = null;
+				var setting = {
+					view: {
+						showLine: false,
+						showIcon: false,
+						selectedMulti: false,
+						dblClickExpand: false,
+						addDiyDom: addDiyDom
+					},
+					data: {
+						simpleData: {
+							enable: true,
+							idKey:'rowId',
+								pIdKey:'parentId',
+							rootPId:null
+						}
+					},
+					callback: {
+						beforeClick: beforeClick,
+						onClick: zTreeOnClick
+					}
+				};
+
+				var zNodes = @Html.Raw(Json.Serialize(Model.Trees));
+
+				function addDiyDom(treeId, treeNode) {
+					var spaceWidth = 5;
+					var switchObj = $("#" + treeNode.tId + "_switch"),
+						icoObj = $("#" + treeNode.tId + "_ico");
+					switchObj.remove();
+					icoObj.before(switchObj);
+
+					if (treeNode.level > 1) {
+						var spaceStr = "<span style='display: inline-block;width:" + (spaceWidth * treeNode.level) + "px'></span>";
+						switchObj.before(spaceStr);
+					}
+				}
+
+				function zTreeOnClick(event, treeId, treeNode) {
+					self.data.selectedId = treeNode.rowId;
+					self.data.selectedNode = treeNode;
+					var paths = treeNode.getPath();
+					
+					var html = [];
+
+					for (var i = 0; i < paths.length; i++) {
+						var p = paths[i];
+						var name = p.oldname || p.name;
+						if (i == paths.length - 1) {
+							html.push('<li class="breadcrumb-item active" aria-current="page">' + name + '</li>');
+						}else{
+							html.push('<li class="breadcrumb-item" aria-current="page">' + name + '</li>');
+						}
+					}
+
+					$("#breadcrumb_category_selected").html(html.join(''));
+
+					self.setHref(treeNode.rowId);
+					self.$grid.html('').masonry('layout')
+					self.page = 0;
+					self.loadMore();
+				}
+
+				function beforeClick(treeId, treeNode) {
+					// if (treeNode.level == 0) {
+					// 	var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+					// 	zTree.expandNode(treeNode);
+					// 	return false;
+					// }
+					return true;
+				}
+
+				$(document).ready(function () {
+					var treeObj = $("#treeDemo");
+					$.fn.zTree.init(treeObj, setting, zNodes);
+					
+					treeObj.hover(function () {
+						if (!treeObj.hasClass("showIcon")) {
+							treeObj.addClass("showIcon");
+						}
+					}, function () {
+						treeObj.removeClass("showIcon");
+					});
+
+					fuzzySearch('treeDemo', '#searchMenu', null, true); //初始化模糊搜索方法
+				});
+			}
+		}
+
+		new Page();
+
+	</script>
+
+	<script id="blog-item-template" type="text/html">
+		{{each}}
+		<div class="grid-item">
+			<div class="card" >
+				<i class="cover-url" style="background-image:url('{{$value.coverUrl}}')"></i>
+				<div class="card-body">
+					<a href="@Url.Action("Detail","Blog")/{{$value.rowId}}" class="card-title">{{$value.title || "未命名文章"}}</a>
+					<p class="card-text ">{{$value.quote}}</p>
+					<p class="card-text"><small class="text-muted created-date" data-time="{{$value.createdDate}}">{{$value.createdDate | formatDate}}</small></p>
+				</div>
+				<div class="grid-item__icon-btn">
+					<div class="d-flex">
+						<a href="@Url.Action("Detail","Blog")/{{$value.rowId}}" class="card-link"><i class="ti-trash"></i></a>
+						<a href="@Url.Action("NewPost","Blog")/{{$value.rowId}}" target="_blank" class="card-link"><i class="ti-pencil-alt"></i></a>
+					</div>
+				</div>
+			</div>
+		</div>
+		{{/each}}
+	</script>
+}

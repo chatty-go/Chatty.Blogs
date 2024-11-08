@@ -1,0 +1,247 @@
+﻿@inject IViewLocalizer L
+@using Microsoft.AspNetCore.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.Extensions.Options
+@using Chatty.Blogs.Entities.Blogs
+@inject IOptions<RequestLocalizationOptions> LocOptions
+@{
+	var path = ViewContext.HttpContext.Request.Path;
+	var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+
+	var cultureItems = LocOptions.Value
+	.SupportedUICultures
+	.Select(c => new SelectListItem { Value = c.Name, Text = c.DisplayName })
+	.ToList();
+
+	var currentCultureDisplayName = requestCulture.RequestCulture.UICulture.DisplayName;
+
+	var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value}{Context.Request.QueryString.Value}";
+
+	var siteConfig = ViewBag.SiteConfig as SiteConfig;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>@ViewData["Title"] - @siteConfig?.HomeTitle</title>
+	<meta name="description" content="@siteConfig?.MetaDescription">
+	<meta name="keywords" content="@siteConfig?.Keywords">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="shortcut icon" type="image/x-icon" href="~/images/favicon.html">
+
+    <!-- STYLES -->
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="~/css/all.min.css" type="text/css" media="all">
+	<link rel="stylesheet" href="~/css/slick.css" type="text/css" media="all">
+	<link rel="stylesheet" href="~/css/simple-line-icons.css" type="text/css" media="all">
+	<link rel="stylesheet" href="~/css/style.css" type="text/css" media="all">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+
+	<!-- preloader -->
+	<div id="preloader">
+		<div class="book">
+			<div class="inner">
+				<div class="left"></div>
+				<div class="middle"></div>
+				<div class="right"></div>
+			</div>
+			<ul>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+			</ul>
+		</div>
+	</div>
+
+	<!-- site wrapper -->
+	<div class="site-wrapper">
+
+		<div class="main-overlay"></div>
+
+		<!-- header -->
+		<header class="header-default">
+			<nav class="navbar navbar-expand-lg">
+				<div class="container-xl">
+					<!-- site logo -->
+					<a class="navbar-brand" href="/"><img src="~/images/logo.svg" alt="logo" /></a>
+
+					<div class="collapse navbar-collapse">
+						<!-- menus -->
+						<ul class="navbar-nav mr-auto">
+							<li class="nav-item dropdown @(path=="/"?"active":"")">
+								<a class="nav-link " href="/">@L["Menu_Home"]</a>
+							</li>
+							<li class="nav-item @(path.StartsWithSegments("/Blog")?"active":"")">
+								<a class="nav-link" href="@Url.Action("Index","Blog")">@L["Menu_Blogs"]</a>
+							</li>
+							<li class="nav-item @(path.StartsWithSegments("/Series")?"active":"")">
+								<a class="nav-link" href="@Url.Action("Index","Series")">@L["Menu_Series"]</a>
+							</li>
+							<li class="nav-item @(path=="/About"?"active":"")">
+								<a class="nav-link" href="@Url.Action("Index","About")">@L["Menu_About"]</a>
+							</li>
+							<li class="nav-item @(path=="/Contact"?"active":"")">
+								<a class="nav-link" href="@Url.Action("Index","Contact")">@L["Menu_Contact"]</a>
+							</li>
+						</ul>
+					</div>
+
+					<!-- header right section -->
+					<div class="header-right">
+						<div class="header-buttons">
+							<div class="btn-group d-none d-sm-block">
+								<button type="button" class="icon-language dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+									<i class="icon-globe"></i>
+									@currentCultureDisplayName
+								</button>
+								<ul class="dropdown-menu">
+									@foreach (var culture in cultureItems)
+									{
+										@if (@culture.Text == currentCultureDisplayName)
+										{
+											<li><a data-value="@culture.Value" aria-current="true" class="dropdown-item active" href="@Url.Action("SetLanguage","Home",new {culture = culture.Value,redirect=returnUrl})">@culture.Text</a></li>
+										}
+										else
+										{
+											<li><a data-value="@culture.Value" class="dropdown-item" href="@Url.Action("SetLanguage","Home",new {culture = culture.Value,redirect=returnUrl})">@culture.Text</a></li>
+										}
+
+									}
+								</ul>
+							</div>
+							<button class="search icon-button">
+								<i class="icon-magnifier"></i>
+							</button>
+							<button class="burger-menu icon-button">
+								<span class="burger-icon"></span>
+							</button>
+						</div>
+					</div>
+				</div>
+			</nav>
+		</header>
+
+		<!-- section main content -->
+		@RenderBody()
+
+
+		<!-- footer -->
+		<footer>
+			<div class="container-xl">
+				<div class="footer-inner">
+					<div class="row d-flex align-items-center gy-4">
+						<!-- copyright text -->
+						<div class="col-md-5">
+							<span class="copyright">© 2024 Chatty.Blogs. @L["Footer_PowerBy"]</span>
+						</div>
+
+						<!-- social icons -->
+						<div class="col-md-4 text-center">
+							
+						</div>
+
+						<!-- go to top button -->
+						<div class="col-md-3">
+							<a href="#" id="return-to-top" class="float-md-end"><i class="icon-arrow-up"></i>@L["Page_Action_BackTop"]</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</footer>
+
+	</div><!-- end site wrapper -->
+	<!-- search popup area -->
+	<div class="search-popup">
+		<!-- close button -->
+		<button type="button" class="btn-close" aria-label="Close"></button>
+		<!-- content -->
+		<div class="search-content">
+			<div class="text-center">
+				<h3 class="mb-4 mt-0">Press ESC to close</h3>
+			</div>
+			<!-- form -->
+			<form class="d-flex search-form">
+				<input class="form-control me-2" type="search" placeholder="Search and press enter ..." aria-label="Search">
+				<button class="btn btn-default btn-lg" type="submit"><i class="icon-magnifier"></i></button>
+			</form>
+		</div>
+	</div>
+
+	<!-- canvas menu -->
+	<div class="canvas-menu d-flex align-items-end flex-column">
+		<!-- close button -->
+		<button type="button" class="btn-close" aria-label="Close"></button>
+
+		<!-- logo -->
+		<div class="logo">
+			<img src="~/images/logo.svg" alt="Katen" />
+		</div>
+
+		<!-- menu -->
+		<nav>
+			<ul class="vertical-menu">
+				<li class="active">
+					<a href="@Url.Action("Index","Home")">@L["Menu_Home"]</a>
+				</li>
+				<li><a href="@Url.Action("Index","Blog")">@L["Menu_Blogs"]</a></li>
+				<li><a href="@Url.Action("Index","Series")">@L["Menu_Series"]</a></li>
+				<li><a href="@Url.Action("Index","About")">@L["Menu_About"]</a></li>
+				<li><a href="@Url.Action("Index","Contact")">@L["Menu_Contact"]</a></li>
+			</ul>
+		</nav>
+
+		<div class="canvas-lang">
+			<ul class="vertical-menu">
+				<li class="active">
+					<a>@currentCultureDisplayName</a>
+					<ul class="submenu">
+						@foreach (var culture in cultureItems)
+						{
+							@if (@culture.Text == currentCultureDisplayName)
+							{
+								<li><a data-value="@culture.Value" aria-current="true" class="dropdown-item active" href="@Url.Action("SetLanguage","Home",new {culture = culture.Value,redirect=returnUrl})">@culture.Text</a></li>
+							}
+							else
+							{
+								<li><a data-value="@culture.Value" class="dropdown-item" href="@Url.Action("SetLanguage","Home",new {culture = culture.Value,redirect=returnUrl})">@culture.Text</a></li>
+							}
+
+						}
+					</ul>
+				</li>
+			</ul>
+		</div>
+	</div>
+
+	<!-- JAVA SCRIPTS -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/js/popper.min.js"></script>
+	<script src="~/js/bootstrap.min.js"></script>
+	<script src="~/js/slick.min.js"></script>
+	<script src="~/js/jquery.sticky-sidebar.min.js"></script>
+	<script src="~/js/custom.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

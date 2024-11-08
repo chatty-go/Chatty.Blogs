@@ -1,0 +1,21 @@
+﻿@inject IViewLocalizer L
+@{
+    ViewData["Title"] = "文章模板";
+}
+
+<div class="page-header">
+    <h1>文章模板</h1>
+    <div class="page-path">
+        <div class=d-flex>
+            <a class="back" onclick="history.back()"><i class="ti-arrow-left"></i></a>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Series")">文章</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">文章模板</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+        </div>
+    </div>
+</div>

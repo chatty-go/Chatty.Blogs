@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Admin\Series\SeriesOutlineService.cs~RF28cb53b3.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Chatty.Blogs.Core\Chatty.Blogs.Core.csproj" />
+    <ProjectReference Include="..\Chatty.Blogs.Database\Chatty.Blogs.Database.csproj" />
+    <ProjectReference Include="..\Chatty.Blogs.Entities\Chatty.Blogs.Entities.csproj" />
+  </ItemGroup>
+
+</Project>

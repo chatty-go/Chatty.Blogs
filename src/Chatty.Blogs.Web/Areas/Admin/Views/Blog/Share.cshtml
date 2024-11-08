@@ -1,0 +1,154 @@
+﻿@model Chatty.Blogs.Web.Areas.Admin.ViewModels.ArtilceShareViewModel
+@{
+    Layout = null;
+}
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="~/images/favicon.ico">
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<link href="~/plugins/highlight/themes/vs.css" rel="stylesheet" />
+
+<!--代码高亮插件-->
+<link href="~/plugs/highlight/themes/vs.css" rel="stylesheet" />
+@if (ViewBag.hasPassword == "N" || ViewBag.authorized == "Y")
+{
+    <title>@Model.share.title</title>
+}
+else
+{
+    <title>分享</title>
+}
+
+<style>
+
+    body {
+        background: #f1f1f1;
+    }
+
+    .rich-title {
+        font-size: 28px;
+        padding-top: 20px;
+    }
+
+    .rich-meta {
+        font-size: 12px;
+        color: #5e6c84;
+        line-height: 1.5;
+        font-weight: 300;
+        margin-bottom: 20px;
+    }
+
+    .container {
+        padding-top: 70px;
+        padding-left: 40px;
+        padding-right: 40px;
+        padding-bottom: 40px;
+    }
+     .container img{
+        max-width:100%;
+    }
+    .content {
+        max-width: 768px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.7);
+    }
+
+    @@media (max-width: 576px) {
+        .container {
+            padding: 20px;
+        }
+    }
+</style>
+
+@if (ViewBag.hasPassword == "N" || ViewBag.authorized == "Y")
+{
+    <div class="container content pt90">
+        <h1 class="rich-title">@Model.share.title</h1>
+        <div class="rich-meta">
+            创建于 @Model.share.created_date.ToString("yyyy-MM-dd HH:mm")
+            @if (DateTime.MinValue.ToString() != Model.share.last_upd_date?.ToString())
+            {
+                <span>，最后修改于 @Model.share.last_upd_date?.ToString("yyyy-MM-dd HH:mm")</span>
+            }
+        </div>
+        <div class="rich-content ck-content">@Html.Raw(@Model.share.content)</div>
+    </div>
+}
+
+<!-- 输入密码窗口 -->
+<div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">输入访问密码</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="txt_password" placeholder="" aria-label="Recipient's username" aria-describedby="basic-addon2">
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn_confirm">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+<!--代码高亮插件-->
+<script src="~/plugins/highlight/highlight.min.js"></script>
+<script src="~/plugins/watermark/watermark.min.js"></script>
+
+
+<script>
+
+    var Page = function () {
+        this.init();
+    }
+
+    Page.prototype = {
+        init: function () {
+            this.id = '@Model.share.row_id';
+
+            $('body').watermark({
+                texts: ["林俊杰", "喜欢打Dota", "但其实更喜欢田馥甄"], //水印文字
+                textColor: "#d2d2d2", //文字颜色
+                textFont: '14px 微软雅黑', //字体
+                width: 100, //水印文字的水平间距
+                height: 100,  //水印文字的高度间距（低于文字高度会被替代）
+                textRotate: -30 //-90到0， 负数值，不包含-90
+            });
+
+            this.bindEvent();
+            hljs.highlightAll();
+
+            if ('@ViewBag.hasPassword' == "Y" && '@ViewBag.authorized' == "N") {
+                $('#passwordModal').modal('show');
+            }
+
+        },
+        bindEvent: function () {
+            var self = this;
+
+            // 确认输入密码
+            $('#btn_confirm').on('click', function () {
+                var password = $('#txt_password').val();
+                if (password.length == 0) {
+                    return;
+                } else {
+                    window.location.replace(window.location.pathname + "?password=" + password);
+                }
+            });
+
+        },
+    }
+
+    window.onload = function () {
+        new Page();
+    }
+</script>

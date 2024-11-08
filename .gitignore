@@ -1,0 +1,12 @@
+/**/bin
+/**/obj
+/**/logs
+.vs/
+/Chatty.Blogs.Database/obj
+/Chatty.Blogs.Database/bin
+/Chatty.Blogs.Core/bin
+/Chatty.Blogs.Core/obj
+/Chatty.Blogs.Entities/bin
+/Chatty.Blogs.Entities/obj
+/Chatty.Blogs.Services/bin
+/Chatty.Blogs.Services/obj

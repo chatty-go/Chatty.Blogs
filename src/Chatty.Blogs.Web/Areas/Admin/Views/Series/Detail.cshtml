@@ -1,0 +1,634 @@
+﻿@inject IViewLocalizer L
+@model Chatty.Blogs.Web.Areas.Admin.ViewModels.SeriesDetailViewModel
+
+@{
+    ViewData["Title"] = "专栏";
+}
+
+<link href="~/plugins/ztree/css/ztreestyle/ztreestyle.css" rel="stylesheet" />
+<link href="~/plugins/ztree/css/outlook.theme.css" rel="stylesheet" />
+<style>
+    .outline-edit{
+		border: 1px solid #f1f1f1;
+		padding: 20px;
+		border-radius: 4px;
+	}
+</style>
+
+<div>
+    <h1>专栏 </h1>
+    <div class="page-path">
+        <div class=d-flex>
+            <a class="back" onclick="history.back()"><i class="ti-arrow-left"></i></a>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Series")">专栏</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.Series?.Title</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+			<a href="@Url.Action("NewPost", "Blog", new { sid = Model.Series?.RowId })" target="_blank" class="btn btn-primary">开始创作</a>
+			<a class="btn btn-primary" href="/Admin/Series/Generate">一键生成静态站点</a>
+        </div>
+    </div> 
+
+    <div class="page-content">
+        <div class="row">
+            <div class="col-3">
+                <div class="card" >
+                    <img src="@Model.Series?.CoverImage" class="card-img-top" alt="Cover Image">
+                  <div class="card-body">
+                    <h5 class="card-title">@Model.Series?.Title</h5>
+                    <p class="card-text">@Model.Series?.Description</p>
+						<a href="@Url.Action("Edit","Series")/@Model.Series?.RowId" class="btn btn-primary">编辑</a>
+                  </div>
+                </div>
+            </div>
+            <div class="col-9">
+                @* <div class="alert alert-primary" role="alert">
+                    <i class="ti-link"></i>栏目编辑
+                </div> *@
+
+				<div class="outline-edit">
+					<div class="row">
+						<div class="col-6">
+							<div class="btn-group actions mb-2" role="group">
+								<button type="button" id="Action_NewOutline_Root" class="btn"><i class="ti-plus"></i>新建栏目</button>
+								<button type="button" class="btn" id="Action_NewOutline_Child"><i class="ti-plus"></i>新建子栏目</button>
+							</div>
+							<form class="mb-2 mt-2 form-search">
+								<div class="input-group">
+									<div class="input-group-prepend">
+										<button class="btn" type="button">
+											<i class="ti-search"></i>
+										</button>
+									</div>
+									<input type="text" id="searchMenu" class="form-control-search form-control form-control-sm" placeholder="@L["Search something"]">
+
+								</div>
+							</form>
+							<ul id="treeDemo" class="ztree"></ul>
+						</div>
+						<div class="col-6">
+							<div class="alert alert-primary" role="alert">
+								<i class="ti-link"></i>栏目编辑
+							</div>
+
+							<form id="formEditOutline" novalidate>
+								@Html.AntiForgeryToken()
+								<input type="hidden" class="form-control" name="rowId">
+								<input type="hidden" class="form-control" name="parentId">
+								<div class="form-group">
+									<label>@L["Page_Form_Model_Name"]</label>
+									<input type="text" required class="form-control" name="Name" value="">
+								</div>
+								<div class="form-group">
+									<label>@L["Page_Form_Model_TaxisNo"]</label>
+									<input type="number" class="form-control" name="TaxisNo" min="0" value="">
+								</div>
+								<div class="form-group">
+									<label>类型</label>
+									<div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" value="Page" type="radio" name="type" id="type1" checked>
+											<label class="form-check-label" for="type1">
+												文章
+											</label>
+										</div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" value="Folder" type="radio" name="type" id="type2">
+											<label class="form-check-label" for="type2">
+												目录
+											</label>
+										</div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" value="Link" type="radio" name="type" id="type3">
+											<label class="form-check-label" for="type3">
+												外链
+											</label>
+										</div>
+									</div>
+								</div>
+								<div class="form-group" style="display:none;" id="wrap_href">
+									<label>外链</label>
+									<input type="text" class="form-control" name="href" value="">
+								</div>
+								<div class="form-group" id="wrap_article_id">
+									<label>@L["Page_Form_Model_ArticleName"]</label>
+									<div class="input-group mb-3">
+										<input type="hidden" name="ArticleId" />
+										<input type="text" class="form-control" name="ArticleName" readonly placeholder="选择关联文章" aria-label="" aria-describedby="">
+										<button class="btn btn-outline-primary" type="button" id="Action_Clear_Article"><i class="ti-close"></i></button>
+										<button class="btn btn-outline-primary" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" type="button">选择</button>
+									</div>
+								</div>
+								<div class="action mt-4">
+									<button class="btn btn-primary" type="submit" id="Action_SaveChange">保存修改</button>
+									<button class="btn" type="button" id="Action_Delete">删除</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal no-border fade" id="deleteOutlineModal" tabindex="-1" aria-labelledby="deleteOutlineModaLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="deleteOutlineModaLabel">提示</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				您正在删除以下栏目，确认删除后无法恢复，请确认？
+				<p id="modalArticleName"></p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" data-bs-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary" id="Page_Action_Confirm_Delete_Outline">确定删除</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="newOutlineModal" tabindex="-1" aria-labelledby="newOutlineModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="newOutlineModalLabel">新建栏目</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form id="formNewOutline" novalidate>
+					<input type="hidden" required class="form-control" name="rowId">
+					<input type="hidden" required class="form-control" name="parentId" value="0">
+					<div class="mb-3">
+						<label for="recipient-name" class="col-form-label">名称:</label>
+						<input type="text" required class="form-control" name="name">
+					</div>
+					<div class="mb-3">
+						<label for="message-text" class="col-form-label">排序号:</label>
+						<input type="number" required class="form-control" name="taxisNo">
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" data-bs-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary" id="Page_NewOutline_Save">保存</button>
+				<button type="button" class="btn btn-primary" id="Page_NewOutline_SaveAndNew">保存并新增</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="chooseArticleModal" tabindex="-1" aria-labelledby="chooseArticleModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="chooseArticleModalLabel">关联文章</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form id="formNewOutline">
+					<input type="hidden" required class="form-control" name="rowId">
+					<input type="hidden" required class="form-control" name="parentId">
+					<div class="mb-3">
+						<label for="recipient-name" class="col-form-label">名称:</label>
+						<input type="text" required class="form-control" name="name">
+					</div>
+					<div class="mb-3">
+						<label for="message-text" class="col-form-label">排序号:</label>
+						<input type="number" required class="form-control" name="taxisNo">
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary" id="btn_submit">提交</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="offcanvas offcanvas-end" style="width:800px;" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+	<div class="offcanvas-header">
+		<h5 id="offcanvasRightLabel">关联文章</h5>
+		<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body">
+		<div class="alert alert-primary" role="alert">
+			关联的文章必须是发布且公开的状态才会显示在前台专栏中。
+		</div>
+
+		<div class="mb-4">
+			<div class="input-group">
+				<input type="text" class="form-control" placeholder="搜索全部文章" >
+				<button class="btn btn-outline-primary" type="button">搜索</button>
+			</div>
+		</div>
+		<table class="table">
+			<thead class="thead-border-primary">
+				<tr>
+					<th scope="col">#</th>
+					<th scope="col">标题</th>
+					<th scope="col">创建时间</th>
+					<th scope="col">状态</th>
+					<th scope="col">范围</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var item in Model.Articles)
+				{
+					<tr data-id="@item.RowId">
+						<td>
+							<div class="form-check">
+								<input class="form-check-input" type="radio" name="choose-article">
+								<label class="form-check-label"></label>
+							</div>
+						</td>
+						<td>@item.Title</td>
+						<td>@item.CreatedDate</td>
+						<td>@L[$"Page_Article_Status_{item.Status}"] </td>
+						<td>@L[$"Page_Article_IsPublic_{item.IsPublic}"] </td>
+					</tr>
+				}
+
+				@if (Model.Articles?.Count == 0)
+				{
+					<tr>
+						<td colspan="4">没有关联的文章</td>
+					</tr>
+				}
+
+			</tbody>
+		</table>
+	</div>
+	<div class="offcanvas-footer">
+		<div class="mt-2 mb-2">
+			<button type="button" class="btn" data-bs-dismiss="offcanvas">取消</button>
+			<button type="button" class="btn btn-primary" data-bs-dismiss="offcanvas" id="Action_Choose_Article_Confirm">确定选择</button>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+    <script src="~/plugins/ztree/js/jquery.ztree.core.min.js"></script>
+    <script src="~/plugins/ztree/js/jquery.ztree.exhide.min.js"></script>
+    <script src="~/plugins/ztree/js/fuzzysearch.js"></script>
+
+    <script>
+        
+        function Page(){
+			this.data = {
+				rowId: '@Model.Series?.RowId',
+				selectedOutlineId:'',
+				selectedNode:null
+			};
+
+			this.$newOutlineModal = new bootstrap.Modal($('#newOutlineModal')[0], {
+				keyboard: false
+			});
+
+			this.$deleteOutlineModal = new bootstrap.Modal($('#deleteOutlineModal')[0], {
+				keyboard: false
+			});
+
+            this.init();
+        }
+
+        Page.prototype = {
+            init:function(){
+				this.bindEvent();
+				this.renderTree();
+			},
+            bindEvent:function(){
+				var self = this;
+
+				$('[name=type]').on('change', function () {
+					var type = this.value;
+					var $wrapArticleId = $('#wrap_article_id');
+					var $wrapUrl = $('#wrap_href');
+
+					if (type == 'Link') {
+						$wrapUrl.show();
+						$wrapArticleId.hide();
+					} else if (type == 'Folder') {
+						$wrapUrl.hide();
+						$wrapArticleId.hide();
+					}else{
+						$wrapUrl.hide().removeAttr('required');
+						$wrapArticleId.show();
+					}
+
+				});
+
+				$('#Action_Clear_Article').on('click', function () {
+					$('input[name=ArticleName]').val('');
+					$('input[name=ArticleId]').val('');
+				});
+
+				// 
+				$('#Action_Choose_Article_Confirm').on('click', function () {
+					var $offcanvasRight = $('#offcanvasRight');
+					var $tr = $offcanvasRight.find('input[name=choose-article]:checked').closest('tr');
+					// var offcanvas = new bootstrap.Offcanvas($offcanvasRight[0],{
+					// 	keyboard: false
+					// });
+
+					if($tr.length>0){
+						var rowId = $tr.data('id');
+						var title = $tr.children('td').eq(1).text();
+
+						//offcanvas.hide();
+
+						$('input[name=ArticleName]').val(title);
+						$('input[name=ArticleId]').val(rowId);
+					}
+
+				});
+
+				// Add Root Outline
+				$('#Action_NewOutline_Root').on('click',function(){
+					var $modal = $('#newOutlineModal');
+					$modal.find('.modal-title').text('新建栏目');
+					$modal.find('input[name=parentId]').val('0');
+
+					self.$newOutlineModal.show();
+
+					self.getMaxTaxisNo('',function (taxisNo) {
+						$modal.find('input[name=taxisNo]').val(taxisNo || 0);
+					});
+
+				});
+
+				// Add Child Outline
+				$('#Action_NewOutline_Child').on('click',function(){
+					var $modal = $('#newOutlineModal');
+					var selectedNode = self.data.selectedNode;
+					if(selectedNode){
+						$modal.find('.modal-title').text(selectedNode.name+':新建子栏目');
+						$modal.find('input[name=parentId]').val(selectedNode.rowId);
+					}else{
+						$modal.find('.modal-title').text('新建栏目');
+					}
+
+					self.$newOutlineModal.show();
+
+					self.getMaxTaxisNo(selectedNode.rowId, function (taxisNo) {
+						var n = taxisNo == 0 ? parseInt(selectedNode.taxisNo) + 10 : taxisNo;
+						$modal.find('input[name=taxisNo]').val(n);
+					});
+				});
+
+				// Delete Outline
+				$('#Action_Delete').on('click',function(){
+
+					if (!self.data.selectedOutlineId) { 
+						return;
+					}
+
+					if (self.isParentNode()) {
+						cocoMessage.error('存在下级栏目，请尝试先删除下级');
+						return;
+					}
+
+					self.$deleteOutlineModal.show();
+
+				});
+
+				$('#Page_Action_Confirm_Delete_Outline').on('click', function () {
+					self.$deleteOutlineModal.hide();
+					var pars = { outlineId: self.data.selectedOutlineId };
+
+					$.get('@Url.Action("DeleteOutline", "Series")', pars, function (res) {
+						if (res.code === 1) {
+							cocoMessage.success('保存成功');
+							self.removeSelectedNode();
+							$('#formEditOutline')[0].reset();
+						} else {
+							cocoMessage.error(res.msg);
+						}
+					});
+				});
+
+				// 新增栏目表单 - 保存按钮事件
+				$('#Page_NewOutline_Save').on('click', function () {
+					$('#formNewOutline').trigger('submit', { hide: true })
+				});
+
+				// 新增栏目表单 - 保存并新建按钮事件
+				$('#Page_NewOutline_SaveAndNew').on('click', function () {
+					$('#formNewOutline').trigger('submit', { hide: false })
+				});
+
+				// 编辑表单 - 提交事件
+				$('#formEditOutline').on('submit', function (e) {
+
+					e.preventDefault();
+
+					if (!self.data.selectedOutlineId) {
+						return;
+					}
+
+					// 获取表单元素
+					var form = e.target;
+
+					// 检查表单是否有效
+					if (!form.checkValidity()) {
+						form.classList.add('was-validated');
+					}
+					else{
+						var formData = $(this).serializeObject();
+						formData.seriesId = self.data.rowId;
+
+						$.post('@Url.Action("UpdateOutline", "Series")', formData, function (res) {
+							if (res.code === 1) {
+								cocoMessage.success('保存成功');
+							} else {
+								cocoMessage.error(res.msg);
+							}
+						});
+					}
+					
+				});
+
+				// 新增栏目表单 - 提交事件
+				$('#formNewOutline').on('submit', function (event,pars) {
+					event.preventDefault();
+					
+					// 获取表单元素
+					var form = event.target;
+
+					// 检查表单是否有效
+					if (!form.checkValidity()) {
+						form.classList.add('was-validated');
+					} else {
+						var formData = $(form).serializeObject();
+						formData.seriesId = self.data.rowId;
+
+						$.post('@Url.Action("NewOutline", "Series")', formData, function (res) {
+							if (res.code === 1) {
+								cocoMessage.success('保存成功');
+								formData.rowId = res.data.rowId;
+								self.addNode(formData);
+								form.reset();
+								form.classList.remove('was-validated')
+
+								pars.hide && self.$newOutlineModal.hide();
+
+								if (!pars.hide) {
+									var newTaxisNo = parseInt(formData.taxisNo) + (formData.parentId ? 1000 : 10)
+									$(form).find('[name=taxisNo]').val(newTaxisNo);
+								}
+
+							} else {
+								cocoMessage.error(res.msg);
+							}
+						});
+					}
+				});
+
+			},
+			renderForm:function(formData){
+
+				console.log('formData',formData)
+
+				var $form  = $('#formEditOutline');
+
+				$form.find('input[name="Name"]').val(formData.name);
+				$form.find('input[name="rowId"]').val(formData.rowId);
+				$form.find('input[name="TaxisNo"]').val(formData.taxisNo);
+				$form.find('input[name=ArticleName]').val(formData.articleName);
+				$form.find('input[name=ArticleId]').val(formData.articleId);
+				$form.find('input[value=' + formData.type + ']').prop('checked', true).trigger('change');
+				$form.find('input[name=href]').val(formData.href);
+				$form.find('input[name=parentId]').val(formData.parentId);
+
+			},
+			getMaxTaxisNo:function(parentId,callback){
+				var pars = { 
+					seriesId: this.data.rowId,
+					parentId: parentId
+				};
+
+				var url = '@Url.Action("GetMaxTaxisNo", "Series")';
+
+				$.get(url, pars, function (res) { 
+					if(res.code==1){
+						callback && callback(res.data);
+					}else{
+						callback && callback(0);
+					}
+				});
+			},
+			renderTree: function () {
+				var self=this;
+
+				var curMenu = null, zTree_Menu = null;
+				var setting = {
+					view: {
+						showLine: false,
+						showIcon: false,
+						selectedMulti: false,
+						dblClickExpand: false,
+						addDiyDom: addDiyDom
+					},
+					data: {
+						simpleData: {
+							enable: true,
+							idKey:'rowId',
+								pIdKey:'parentId',
+							rootPId:null
+						}
+					},
+					callback: {
+						beforeClick: beforeClick,
+						onClick: zTreeOnClick
+					}
+				};
+
+				var zNodes = @Html.Raw(Json.Serialize(Model.Outlines));
+
+				function addDiyDom(treeId, treeNode) {
+					var spaceWidth = 5;
+					var switchObj = $("#" + treeNode.tId + "_switch"),
+						icoObj = $("#" + treeNode.tId + "_ico");
+					switchObj.remove();
+					icoObj.before(switchObj);
+
+					if (treeNode.level > 1) {
+						var spaceStr = "<span style='display: inline-block;width:" + (spaceWidth * treeNode.level) + "px'></span>";
+						switchObj.before(spaceStr);
+					}
+				}
+
+				function zTreeOnClick(event, treeId, treeNode) {
+					event.preventDefault();
+
+					self.data.selectedOutlineId = treeNode.rowId;
+					self.data.selectedNode = treeNode;
+
+					self.renderForm(treeNode);
+
+				}
+
+				function beforeClick(treeId, treeNode) {
+					// if (treeNode.level == 0) {
+					// 	var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+					// 	zTree.expandNode(treeNode);
+					// 	return false;
+					// }
+					return true;
+				}
+
+				$(document).ready(function () {
+					var treeObj = $("#treeDemo");
+					$.fn.zTree.init(treeObj, setting, zNodes);
+					
+					fuzzySearch('treeDemo', '#searchMenu', null, true); //初始化模糊搜索方法
+				});
+			},
+			addNode:function(nodeData){
+				var zTree = this.getZtree();
+
+				var nodes = zTree.getSelectedNodes();
+				var treeNode = nodes[0];
+				if (treeNode && nodeData.parentId !="0") {
+					treeNode = zTree.addNodes(treeNode, nodeData);
+				} else {
+					treeNode = zTree.addNodes(null, nodeData);
+				}
+			},
+			getZtree:function(){
+				var ztree = $.fn.zTree.getZTreeObj("treeDemo");
+
+				return ztree;
+			},
+			isParentNode:function(){
+				var zTree = this.getZtree();
+				var nodes = zTree.getSelectedNodes();
+				var treeNode = nodes[0];
+
+				return treeNode.isParent;
+			},
+			removeSelectedNode:function(){
+				var zTree = this.getZtree();
+				var nodes = zTree.getSelectedNodes();
+				var treeNode = nodes[0];
+
+				zTree.removeNode(treeNode);
+			}
+        };
+
+        $(function(){
+            new Page();
+        });
+
+    </script>
+}

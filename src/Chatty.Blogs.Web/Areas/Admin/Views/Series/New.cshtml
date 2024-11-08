@@ -1,0 +1,157 @@
+﻿@inject IViewLocalizer L
+@{
+    ViewData["Title"] = L["Page_Title"];
+}
+
+<style>
+    .cover-wrapper{
+        height: 100px;
+        width: 130px;
+        background: #f1f1f1;
+        background-image: url('');
+        background-size: cover;
+    }
+
+    .was-validated .cover-wrapper {
+        border: 1px solid #dc3545;
+    }
+</style>
+
+<div>
+    <div class="page-header">
+        <h1>@L["Page_Title"]</h1>
+        <div class="page-path">
+            <div class=d-flex>
+                <a class="back" onclick="history.back()"><i class="ti-arrow-left"></i></a>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Series")">专栏</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">新建</li>
+                    </ol>
+                </nav>
+            </div>
+            <div>
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="">
+        <div class="content-title">
+            <h4>@L["Page_Tab_Info"]</h4>
+        </div>
+        <form method="post" id="formNewSeries" novalidate action="@Url.Action("Save", "Series", new { area = "Admin" })">
+            @Html.AntiForgeryToken()
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>@L["Page_Form_Model_CoverImage"]</label>
+                        <div class="d-flex mb-3">
+                            <figure class="me-3">
+                                <div class="cover-wrapper" id="coverImagePreview" style="background-image: url('')"></div>
+                            </figure>
+                            <div>
+                                <div class="position-relative d-inline-flex">
+                                    <button type="button" class="btn btn-outline-primary me-2"><i class="ti-cloud-up"></i>@L["Page_Form_Action_Upload"]</button>
+                                    <input required accept="image/png, image/jpeg" type="file" id="CoverImage" class="hide-file" />
+                                    <input type="hidden"  name="CoverImage" value="" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>@L["Page_Form_Model_Title"]</label>
+                        <input type="text" required class="form-control" name="Title" value="">
+                    </div>
+                    <div class="form-group">
+                        <label>@L["Page_Form_Model_Description"]</label>
+                        <textarea rows="5" required style="height:100px;" class="form-control" name="Description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>@L["Page_Form_Model_TaxisNo"]</label>
+                        <input type="number" class="form-control" required name="TaxisNo" min="0" value="">
+                    </div>
+                    <div class="form-group">
+                        <label>@L["Page_Form_Model_IsPublic"]</label>
+                        <select class="form-control" name="IsPublic">
+                            <option value="1" selected>公开</option>
+                            <option value="0">私有</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="action mt-2 mb-4">
+                <button class="btn btn-primary" type="submit" id="Action_SaveChange">@L["Page_Form_Action_Save"]</button>
+                <button class="btn" type="button" id="Action_Cancel" onclick="history.back()">@L["Page_Form_Action_Cancel"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+        function Page(){
+
+            this.init();
+        }
+
+        Page.prototype = {
+            init:function(){
+                this.bindEvent();   
+            },
+            bindEvent:function(){
+                var self=this;
+
+                $('#formNewSeries').on('submit', function (e) {
+                    e.preventDefault();
+
+                    // 获取表单元素
+                    var form = e.target;
+
+                    // 检查表单是否有效
+                    if (!form.checkValidity()) {
+                        form.classList.add('was-validated');
+                    }else{
+                        form.submit();
+                    }
+                });
+
+                // 上传封面
+                $('#CoverImage').on('change', function (e) {
+                    
+                    var $this = $(this);
+
+                    var formData = new FormData();
+                    formData.append('formFile', e.target.files[0]);
+
+                    $.ajax({
+                        url: '@Url.Action("Index", "Upload")',
+                        type: 'POST',
+                        data: formData,
+                        contentType: false,//这里
+                        processData: false,//这两个一定设置为false
+                        success: function (res) {
+                            
+                            if (res.code === 1) {
+                                $('#coverImagePreview').css('background-image', 'url(' + res.data.url + ')');
+                                $this.next().val(res.data.url);
+                            }
+                        },
+                        error: function (err) {
+                            console.log('err', err)
+                        }
+                    });
+
+                });
+            }
+        };
+
+        $(function () { 
+            new Page();
+        });
+
+    </script>
+      
+}

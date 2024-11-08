@@ -1,0 +1,342 @@
+﻿@inject IViewLocalizer L
+@model Chatty.Blogs.Web.Areas.Admin.ViewModels.SeriesIndexViewModel
+@{
+    ViewData["Title"] = L["Page_Title"];
+}
+
+<style>
+    .grid-item {
+        width: 400px;
+        margin-bottom: 10px;
+    }
+
+    .cover-url {
+        height: 200px;
+        background-size: cover;
+        background-position: 50% 50%;
+        background-repeat: no-repeat;
+        background-color: #f1f1f1;
+    }
+
+    .article .card .card-title {
+        font-size: 16px;
+        color: #353535;
+        font-weight: 400;
+        display: block;
+    }
+
+    .article .card .card-text {
+        font-size: 14px;
+        color: #7e8081;
+    }
+
+    .grid .grid-item:hover .grid-item__icon-btn {
+        opacity: 1;
+    }
+
+    .grid-item__icon-btn {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        opacity: 0;
+    }
+
+    .article .card-link {
+        background: #fff;
+        width: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 30px;
+        border-radius: 30px;
+        box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.2);
+    }
+
+        .article .card-link.publish {
+            width: 74px;
+        }
+</style>
+
+<div>
+    <h1>@L["Page_Title"] [@(Model.TotalCount)]</h1>
+    <div class="m-t-15 m-b-15 d-flex justify-content-between">
+
+        <div>
+            <div class="input-group">
+                <input type="text" id="Page_Search_Keyword" value="@Model.Search" class="form-control" placeholder="@L["Page_Search_Message"]" aria-label="Recipient's username" aria-describedby="button-addon2">
+                <button class="btn btn-outline-primary" id="Page_Action_Clear" type="button">
+                    <i class="ti-close"></i>
+                </button>
+                <button class="btn btn-outline-primary" id="Page_Action_Search" type="button">@L["Page_Action_Search"]</button>
+            </div>
+        </div>
+
+        <div class="d-flex">
+            <a class="btn btn-primary m-r-10" href="/Admin/Series/New">@L["Page_Action_Add"]</a>
+        </div>
+    </div>
+    <div class="article grid">
+        @foreach (var item in Model.List)
+        {
+            <div class="grid-item">
+                <div class="card">
+                    <i class="cover-url" style="background-image:url('@item.CoverImage')"></i>
+                    <div class="card-body">
+                        <a href="@Url.Action("Detail","Series")/@item.RowId" class="card-title ">@item.Title</a>
+                        <p class="card-text ">@item.Description</p>
+                        <p class="card-text"><small class="text-muted created-date" data-time="@item.CreatedDate"></small></p>
+                    </div>
+                    <div class="grid-item__icon-btn">
+                        <div class="d-flex">
+                            <a class="card-link btn-delete" data-id="@item.RowId"><i class="ti-trash"></i></a>
+                            <a href="@Url.Action("Edit","Series")/@item.RowId" class="card-link"><i class="ti-pencil-alt"></i></a>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div id="nomore" style="@(Model.Finished==true?"":"display:none;")">
+        <p class="text-center text-muted">没有更多了</p>
+    </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal no-border fade" id="modalDelete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">提示</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                您正在删除以下专栏，确认删除后无法恢复，请确认？
+                <p id="modalArticleName"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="btnDeleteConfirm">确定删除</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="~/plugins/dayjs/dayjs.min.js"></script>
+    <script src="~/plugins/dayjs/plugin/istoday.js"></script>
+    <script src="~/plugins/dayjs/plugin/issameorafter.js"></script>
+    <script src="~/plugins/masonry/masonry.pkgd.min.js"></script>
+    <script src="~/plugins/arttemplate/template.js"></script>
+
+    <script>
+
+        // Dayjs Guide:https://dayjs.fenxianglu.cn/
+        dayjs.extend(dayjs_plugin_isToday);
+        dayjs.extend(dayjs_plugin_isSameOrAfter);
+
+        function Page() {
+            this.nomore = @(Model.Finished==true?"true":"false");
+            this.loading = false;
+            this.page = 1;
+            this.sort = '@Model.Sort';
+            this.search = '@Model.Search';
+            this.$grid = null;
+
+            this.selectedId = null;
+            this.$selectedItem = null;
+            this.selectedName = null;
+
+            this.init();
+        }
+
+        Page.prototype = {
+            init: function () {
+                var self = this;
+
+                template.helper('formatDate', function (time) {
+                    var formattedDate = self.formatDate(time);
+                    return '更新于 ' + formattedDate;
+                });
+
+                this.renderTime();
+
+                this.$grid = $('.grid').masonry({
+                    itemSelector: '.grid-item',
+                    columnWidth: 200,
+                    gutter: 10
+                });
+
+                this.bindEvent();
+            },
+            bindEvent: function () {
+                var self = this;
+
+                // Clear Search
+                $('#Page_Action_Clear').on('click', function () {
+                    var keyword = $('#Page_Search_Keyword').val();
+                    if (keyword) { 
+                        window.location.href = '/Admin/Series?sort=' + self.sort;
+                    }
+                });
+
+                // Search
+                $('#Page_Action_Search').on('click', function () {
+                    var keyword = $('#Page_Search_Keyword').val();
+                    if (keyword) {
+                        window.location.href = '/Admin/Series?search=' + keyword + '&sort=' + self.sort;
+                    }
+                });
+
+                // scroll bottom loadmore
+                $(document).on('scroll', function () {
+                    var $this = $(this);
+                    var height = $(this).height();      //内容高度
+                    var contentH = $(window).height();  //窗口高度
+                    var scrollTop = $(this).scrollTop();//滚动高度
+
+                    var bootomHeight = height - scrollTop - contentH;
+
+                    if (bootomHeight < 3) {
+                        console.log('loadmore')
+                        self.loadMore();
+                    }
+
+                });
+
+                // delete article event
+                $('.article').on('click', '.btn-delete', function () {
+                    var $this = $(this);
+                    self.selectedId = $this.data('id');
+                    self.$selectedItem = $this.closest('.grid-item');
+                    self.selectedName = self.$selectedItem.find('.card-title').text();
+                    $('#modalArticleName').text('【' + self.selectedName + '】');
+
+                    var modal = self.getModal('modalDelete');
+                    modal.show();
+                });
+
+                $('#btnDeleteConfirm').on('click', function () {
+                    $.ajax({
+                        url: '@Url.Action("DeleteById", "Series")',
+                        type: 'post',
+                        dataType: 'json',
+                        data: {
+                            id: self.selectedId
+                        },
+                        success: function (res) {
+                            if (res.code === 1) {
+                                self.$grid.masonry('remove', self.$selectedItem).masonry('layout');
+                                self.$selectedItem = null;
+                                self.selectedId = null;
+
+                                var modal = self.getModal('modalDelete');
+                                modal.hide();
+                            }
+                        },
+                        error: function (xhr, status, error) { }
+                    });
+                });
+
+            },
+
+            getModal: function (id) {
+                var modal = bootstrap.Modal.getOrCreateInstance(document.getElementById(id));
+
+                return modal;
+            },
+
+            loadMore: function () {
+                var self = this;
+
+                if (this.loading || this.nomore) { return; }
+
+                this.page++;
+
+                $.ajax({
+                    url: '@Url.Action("Loadmore", "Series")',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        page: this.page
+                    },
+                    success: function (res) {
+                        if (res.code === 1) {
+
+                            if (res.data.finished) {
+                                self.nomore = true;
+                                $('#nomore').show();
+                            }
+
+                            if (res.data.list.length > 0) {
+                                var html = template('blog-item-template', res.data.list);
+                                var $html = $(html);
+
+                                self.$grid.append($html).masonry('appended', $html);
+                            }
+                        }
+                    },
+                    error: function (xhr, status, error) { }
+                })
+            },
+            formatDate: function (time) {
+                var eventDate = dayjs(time);
+
+                var formattedDate;
+
+                if (eventDate.isToday()) {
+                    // 如果是今天，则显示时分
+                    formattedDate = eventDate.format('HH:mm');
+                } else if (eventDate.isSame(dayjs(), 'year')) {
+                    // 如果是今年内，则显示月日
+                    formattedDate = eventDate.format('MM月DD日');
+                } else {
+                    // 如果是去年或更早，则显示年月日
+                    formattedDate = eventDate.format('YYYY-MM-DD');
+                }
+
+                return formattedDate;
+            },
+            renderTime: function () {
+                var self = this;
+
+                $('.created-date').each(function () {
+                    var $this = $(this);
+                    var time = $this.data('time');
+
+                    var formattedDate = self.formatDate(time);
+
+                    $this.text('更新于 ' + formattedDate);
+                });
+            }
+        }
+
+        $(function () {
+            new Page(); // entry
+        });
+
+    </script>
+
+
+    <script id="blog-item-template" type="text/html">
+        {{each}}
+        <div class="grid-item">
+            <div class="card" >
+                <i class="cover-url" style="background-image:url('{{$value.coverUrl}}')"></i>
+                <div class="card-body">
+                    <a href="@Url.Action("Detail","Blog")/{{$value.rowId}}" class="card-title">{{$value.title || "未命名文章"}}</a>
+                    <p class="card-text ">{{$value.quote}}</p>
+                    <p class="card-text"><small class="text-muted created-date" data-time="{{$value.createdDate}}">{{$value.createdDate | formatDate}}</small></p>
+                </div>
+                <div class="grid-item__icon-btn">
+                    <div class="d-flex">
+                        <a href="@Url.Action("Detail","Blog")/{{$value.rowId}}" class="card-link"><i class="ti-trash"></i></a>
+                        <a href="@Url.Action("NewPost","Blog")/{{$value.rowId}}" class="card-link"><i class="ti-pencil-alt"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+    </script>
+}

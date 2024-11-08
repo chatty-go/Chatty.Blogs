@@ -1,0 +1,235 @@
+﻿@inject IViewLocalizer L
+@model Chatty.Blogs.Web.Areas.Admin.ViewModels.MessageIndexViewModel
+@{
+    ViewData["Title"] = L["Page_Title"];
+}
+
+<div class="page-header">
+    <h1>@L["Page_Title"] [@Model.TotalMessage]</h1>
+</div>
+
+<div class="page-body mt-4">
+
+    <ul class="nav nav-lines mt-4 mb-4">
+        <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="@Url.Action("Index","Message")">@L["Page_Tab_Notice"]</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="">@L["Page_Tab_Message"]</a>
+        </li>
+    </ul>
+
+    <div id="list">
+        @foreach (var message in Model.List)
+        {
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">@message.Title</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">@message.CreatedDate.ToString("yyyy-MM-dd HH:mm")</h6>
+                    <p class="card-text">@message.Content</p>
+                    @if (!string.IsNullOrEmpty(message.MoreUrl))
+                    {
+                        <a href="@message.MoreUrl" class="card-link">阅读原文</a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div>
+        <div id="nomore" style="@(Model.Finished==true?"":"display:none;")">
+            <div class="text-center text-muted mb-4">没有更多了</div>
+        </div>
+
+        <div id="loadmore" style="@(Model.Finished==false?"":"display:none;")">
+            <div class="text-center text-muted mb-4 text-cursor"><i class="ti-angle-down"></i>加载更多</div>
+        </div>
+
+        <div id="loading" style="display:none;">
+            <div class="text-center text-muted mb-4">
+                <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                正在加载
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/plugins/dayjs/dayjs.min.js"></script>
+    <script src="~/plugins/dayjs/plugin/istoday.js"></script>
+    <script src="~/plugins/dayjs/plugin/issameorafter.js"></script>
+    <script src="~/plugins/masonry/masonry.pkgd.min.js"></script>
+    <script src="~/plugins/arttemplate/template.js"></script>
+
+    <script>
+
+        // Dayjs Guide:https://dayjs.fenxianglu.cn/
+        dayjs.extend(dayjs_plugin_isToday);
+        dayjs.extend(dayjs_plugin_isSameOrAfter);
+
+        function Page(){
+            this.nomore = @(Model.Finished == true ? "true" : "false");
+            this.loading = false;
+            this.page = 1;
+
+            this.$loading = $('#loading');
+            this.$loadmore = $('#loadmore');
+            this.$nomore = $('#nomore');
+            this.$list = $('#list');
+
+            this.init();
+
+        }
+
+        Page.prototype = {
+            init:function(){
+                var self=this;
+
+                template.helper('formatDate', function (time) {
+                    var formattedDate = self.formatDate(time);
+                    return formattedDate;
+                });
+
+                this.renderTime();
+                this.bindEvent();
+            },
+            bindEvent:function(){
+                var self = this;
+
+                this.$loadmore.on('click', function () {
+                    self.loadMore();
+                });
+
+                // scroll bottom loadmore
+                $(document).on('scroll', function () {
+                    var $this = $(this);
+                    var height = $(this).height();      //内容高度
+                    var contentH = $(window).height();  //窗口高度
+                    var scrollTop = $(this).scrollTop();//滚动高度
+
+                    var bootomHeight = height - scrollTop - contentH;
+
+                    if (bootomHeight < 3) {
+                        console.log('loadmore')
+                        self.loadMore();
+                    }
+
+                });
+
+            },
+
+            switchLoading:function(status){
+                switch (status) {
+                    case 'loading':
+                        this.$loading.show();
+                        this.$loadmore.hide();
+                        this.$nomore.hide();
+                        break;
+
+                    case 'nomore':
+                        this.$loading.hide();
+                        this.$loadmore.hide();
+                        this.$nomore.show();
+                        break;
+
+                    case 'loadmore':
+                        this.$loading.hide();
+                        this.$loadmore.show();
+                        this.$nomore.hide();
+                        break;
+                }
+            },
+            loadMore:function(){
+                var self=this;
+
+                if (this.loading || this.nomore) { return; }
+
+                this.page++;
+                this.loading = true;
+                this.switchLoading('loading');
+
+                $.ajax({
+                    url: '@Url.Action("Loadmore", "Message")',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        page: this.page,
+                        sort:this.sort,
+                        search:this.search,
+                        msgType:'user'
+                    },
+                    success: function (res) {
+                        self.loading = false;
+                        if (res.code === 1) {
+                            if (res.data.finished) {
+                                self.nomore = true;
+                                self.switchLoading('nomore');
+                            }else{
+                                self.switchLoading('loadmore');
+                            }
+
+                            if (res.data.list.length > 0) {
+                                var html = template('blog-item-template', res.data.list);
+                                self.$list.append(html);
+                            }
+                        }
+                    },
+                    error: function (xhr, status, error) { }
+                })
+            },
+            formatDate: function (time) {
+                var eventDate = dayjs(time);
+
+                var formattedDate;
+
+                if (eventDate.isToday()) {
+                    // 如果是今天，则显示时分
+                    formattedDate = eventDate.format('HH:mm');
+                } else if (eventDate.isSame(dayjs(), 'year')) {
+                    // 如果是今年内，则显示月日
+                    formattedDate = eventDate.format('MM月DD日');
+                } else {
+                    // 如果是去年或更早，则显示年月日
+                    formattedDate = eventDate.format('YYYY-MM-DD');
+                }
+
+                return formattedDate;
+            },
+            renderTime:function(){
+                var self=this;
+
+                $('.created-date').each(function () {
+                    var $this = $(this);
+                    var time = $this.data('time');
+
+                    var formattedDate = self.formatDate(time);
+
+                    $this.text(formattedDate);
+                });
+            }
+        }
+
+        $(function () {
+            new Page(); // entry
+        });
+
+    </script>
+
+
+    <script id="blog-item-template" type="text/html">
+        {{each}}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{$value.title}}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{$value.createdDate | formatDate}}</h6>
+                <p class="card-text">{{$value.content}}</p>
+                {{ if $value.moreUrl}}
+                <a href="$value.moreUrl" class="card-link">阅读原文</a>
+                {{/if}}
+            </div>
+        </div>
+        {{/each}}
+    </script>
+}

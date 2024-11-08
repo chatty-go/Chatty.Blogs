@@ -1,0 +1,66 @@
+﻿@model Chatty.Blogs.Web.Areas.Admin.ViewModels.HomeMessageViewModel
+@{
+
+}
+@if (Model.Messages.Count > 0)
+{
+    <a href="#" class="nav-link nav-link-notify" id="dropdownMenuNotification" title="Notifications"
+    data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="ti-bell"></i>
+    </a>
+}
+else
+{
+    <a href="@Url.Action("Index","Message",new { area = "Admin"})" class="nav-link"  title="Notifications"
+       >
+        <i class="ti-bell"></i>
+    </a>
+}
+<div class="dropdown-menu dropdown-menu-right dropdown-menu-big" aria-labelledby="dropdownMenuNotification">
+    <div class="bg-primary px-3 py-3">
+        <h6 class="mb-0">未读消息[@Model.Messages.Count]</h6>
+    </div>
+    <div class="dropdown-scroll">
+        <ul class="list-group list-group-flush">
+            @foreach (var item in Model.Messages)
+            {
+                <li>
+                    <a href="#" class="list-group-item d-flex hide-show-toggler">
+                        <div>
+                            <figure class="avatar me-3">
+                                <span class="avatar-title bg-success-bright text-success rounded-circle">
+                                    <i class="ti-share"></i>
+                                </span>
+                            </figure>
+                        </div>
+                        <div class="flex-grow-1">
+                            <p class="mb-0">
+                                @item.Title
+                                <i title="Mark as unread" data-toggle="tooltip"
+                                   class="hide-show-toggler-item fa fa-check font-size-11 position-absolute right-0 top-0 mr-3 mt-3"></i>
+                            </p>
+                            <span class="text-muted small">@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</span>
+                        </div>
+                    </a>
+                </li>
+            }
+        </ul>
+        @if (Model.Messages.Count == 0)
+        {
+            <div class="text-center mt-2 mb-2">
+                暂无消息
+            </div>
+        }
+    </div>
+    <div class="px-3 py-2 text-right border-top">
+        <ul class="list-inline small">
+            <li class="list-inline-item mb-0">
+                <a href="@Url.Action("SetAllReaded","Home",new { area = "Admin"})">全部已读</a>
+            </li>
+
+            <li class="list-inline-item mb-0">
+                <a href="@Url.Action("Index","Message",new { area = "Admin"})">消息中心</a>
+            </li>
+        </ul>
+    </div>
+</div>

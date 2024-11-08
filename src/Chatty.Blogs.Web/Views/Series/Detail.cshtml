@@ -1,0 +1,240 @@
+﻿@inject IViewLocalizer L
+@model Chatty.Blogs.Web.ViewModels.SeriesDetailViewModel
+@using Chatty.Blogs.Entities.Blogs
+@{
+    ViewData["Title"] = "专栏";
+}
+
+<style>
+	.series-outline-container{
+		border-right: 1px solid #f1f1f1;
+		height: 100%;
+	}
+
+	ul.series-outline .series-outline .series-outline-link {
+		padding-left:20px;
+	}
+
+	ul.series-outline{
+		margin:0;
+		padding:0;
+	}
+
+	li.series-outline-item{
+		list-style:none;
+	}
+
+	.series-outline-link{
+		display: block;
+		padding: 6px 4px 6px 10px;
+		margin: 2px 0;
+		opacity:0.8;
+	}
+	.series-outline-item.active>.series-outline-link{
+		background-color: #f6f7f8;
+		color:var(--main-bg-color);
+		box-shadow: 2px 0px 0px 0px var(--main-bg-color);
+		opacity:1;font-weight: 600;
+	}
+	.series-outline-link:hover{
+		background-color: #f6f7f8;
+	}
+
+</style>
+
+<section class="main-content">
+    <div class="container-xxl">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">专栏</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.Series?.Title</li>
+            </ol>
+        </nav>
+
+        <div>
+            <div class="row">
+                <div class="col-md-2">
+					<div class="series-outline-container">
+						@{
+							int level = 1;
+							void RenderTreeNode(BlogSeriesOutlineTree node,int l)
+							{
+								var href = node.Type switch
+								{
+									"Page" => Url.Action("Detail", "Series", new { id = node.SeriesId, articleid = node.ArticleId, oid = node.RowId }),
+									"Link" => node.Href,
+									_ => "#"
+								};
+
+								<li class="series-outline-item level_@l @(node.RowId==Model.CurrentOutlineId?"active":"")">
+									<a style="padding-left:@(l*20)px" class="series-outline-link" href="@href">@node.Name</a>
+										@if (node.Children != null && node.Children.Count > 0)
+										{
+											l=l+1;
+											<ul class="series-outline">
+															@foreach (var child in node.Children)
+											{
+												RenderTreeNode(child,l);
+											}
+											</ul>
+										}
+								</li>
+								
+							}
+
+							<ul class="series-outline">
+								@foreach (var item in Model.Outlines)
+								{
+									RenderTreeNode(item,level);
+								}
+							</ul>
+
+						}
+					</div>
+				</div>
+				<div class="col-md-7">
+					<div class="content">
+
+						@if (Model.CurrentOutlineId == "0")
+						{
+							<h2>@Model.Series?.Title</h2>
+							<div>
+								@Html.Raw(Model.Series?.Description)
+							</div>
+						}
+						else
+						{
+							@if (Model.Article == null)
+							{
+								<div class="empty text-center">
+									<img src="@Url.Content("~/admin/svg/icon-empty.svg")" alt="no empty" />
+									<p class="mt-1">@L["Page_Post_Empty"]</p>
+								</div>
+							}
+							else
+							{
+								<h2>@Model.Article?.Title</h2>
+								<div>
+									@Html.Raw(Model.Article?.Content)
+								</div>
+							}
+						}
+
+						
+					</div>
+
+					<div class="d-flex justify-content-between align-items-center">
+						<!-- sidebar 
+						<a>上一章:11</a>
+						<a>下一章:4444</a>
+						-->
+					</div>
+                </div>
+
+                <div class="col-md-3">
+					<!-- sidebar -->
+					<div class="sidebar" id="sidebar">
+						<div class="sidebar__inner">
+
+							<!-- widget categories -->
+							<div class="widget rounded">
+								<div class="widget-header text-center">
+									<h3 class="widget-title">目录</h3>
+									<img src="~/images/wave.svg" class="wave" alt="wave" />
+								</div>
+								<div class="widget-content">
+									<div>
+										@if (Model.Article!=null)
+										{
+											<ul class="outline">
+												@foreach (var item in Model.Article.OutlineList)
+												{
+													<li class="outline-item level-@item.Level">
+														<a class="outline-link" href="#@item.Id">@item.Text</a>
+													</li>
+												}
+											</ul>
+										}
+										
+									</div>
+								</div>
+							</div>
+
+						</div>
+
+					</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts{
+	<script>
+		
+		$(function () {
+
+			function Page() {
+
+				this.init();
+			}
+
+			Page.prototype = {
+				init: function () {
+					console.log('init')
+					//this.renderPage();
+				},
+				renderPage:function(){
+					var $currentNode = $('.series-outline-item.active');
+
+					// while($currentNode){
+
+					// 	console.log($currentNode);
+
+					// 	$currentNode = this.getNextNode($currentNode);
+					// }
+
+					//var $nextNode = this.getNextNode($currentNode)
+
+					$currentNode = this.getNextNode($currentNode);
+
+
+					console.log('$currentNode:', $currentNode.children('a').text());
+
+					// while ($currentNode.length==0) {
+
+					// 	console.log('$currentNode:', $currentNode);
+
+					// 	$currentNode = this.getNextNode($currentNode);
+
+
+					// }
+
+				},
+				getNextNode: function ($currentNode) {
+					// 1-查询当前节点是否有下级
+					var $children = $currentNode.children('ul');
+					if ($children.length > 0) {
+						return $children.children().first();
+					}
+
+					// 2-查询当前节点的下一个兄弟节点
+					var $nextNode = $currentNode.next();
+
+					if ($nextNode.length == 0 && $currentNode.parent().length > 0) {
+						$currentNode = $currentNode.parent().closest('li');
+						$nextNode = $currentNode.next();
+					}
+
+					return $nextNode;
+				}
+			};
+
+			new Page();
+		});
+	
+	</script>
+}
+
+
+

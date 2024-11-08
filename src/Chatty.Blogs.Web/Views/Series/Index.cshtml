@@ -1,0 +1,85 @@
+﻿@{
+    ViewData["Title"] = @L["Page_Title"];
+}
+
+@model Chatty.Blogs.Web.ViewModels.SeriesIndexViewModel
+@inject IViewLocalizer L
+
+<section class="page-header">
+    <div class="container-xl">
+        <div class="text-center">
+            <h1 class="mt-0 mb-2">@L["Page_Title"]</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center mb-0">
+                    <li class="breadcrumb-item"><a href="#">@L["Page_Home"]</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">@L["Page_Title"]</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<!-- section main content -->
+<section class="main-content">
+    <div class="container-xl">
+
+        <div class="row gy-4">
+
+            <div class="col-lg-12">
+
+                <div class="row gy-4">
+
+                    @foreach (var item in Model.List)
+                    {
+                        <div class="col-sm-6">
+                            <!-- post -->
+                            <div class="post post-grid rounded bordered">
+                                <div class="thumb top-rounded">
+                                    <a href="@Url.Action("Detail","Series", new { id = item.RowId })">
+                                        <div class="inner">
+                                            <img src="@Url.Content(@item.CoverImage)" alt="post-title" />
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="details">
+                                    <h5 class="post-title mb-3 mt-3"><a href="@Url.Action("Detail","Series", new { id = item.RowId })">@item.Title</a></h5>
+                                    <p class="excerpt mb-0">@item.Description</p>
+                                </div>
+                                <div class="post-bottom clearfix d-flex align-items-center">
+                                    <ul class="meta list-inline mb-0">
+                                        <li class="list-inline-item">@item.CreatedDate.ToString("d")</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    
+                </div>
+
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        @for (int i = 1; i <= Model.Pages; i++)
+                        {
+                            if (i == Model.Page)
+                            {
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link">@i</span>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Index","Series",new { page = i})">@i</a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </nav>
+
+            </div>
+           
+
+        </div>
+
+    </div>
+</section>

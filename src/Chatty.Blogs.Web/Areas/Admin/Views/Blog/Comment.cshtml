@@ -1,0 +1,350 @@
+﻿@inject IViewLocalizer L
+@model Chatty.Blogs.Web.Areas.Admin.ViewModels.ArticleCommentViewModel
+@{
+    ViewData["Title"] = L["Page_Title"];
+}
+
+<div class="page-header">
+    <h1>@L["Page_Title"] [@Model.Total]</h1>
+</div>
+
+<div class="page-body mt-4">
+
+    <div id="list">
+        @foreach (var message in Model.List)
+        {
+            <div class="card" data-id="@message.RowId">
+                <div class="card-body">
+                    <h5 class="card-title">@message.ArticleTitle</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">@message.CreatedDate.ToString("yyyy-MM-dd HH:mm")</h6>
+                    <p class="card-text">姓名：@message.Name</p>
+                    <p class="card-text">邮箱：@message.Email</p>
+                    <p class="card-text">留言：@message.Content</p>
+                    @if (message.Status==0)
+                    {
+                        <a href="javascript:void(0);" class="card-link btn-approval">审核通过</a>
+                        <a href="javascript:void(0);" class="card-link btn-reject">审核拒绝</a>
+                    }
+
+                    <a href="javascript:void(0);" class="card-link btn-delete">删除留言</a>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div>
+        <div id="nomore" style="@(Model.Finished==true?"":"display:none;")">
+            <div class="text-center text-muted mb-4">没有更多了</div>
+        </div>
+
+        <div id="loadmore" style="@(Model.Finished==false?"":"display:none;")">
+            <div class="text-center text-muted mb-4 text-cursor"><i class="ti-angle-down"></i>加载更多</div>
+        </div>
+
+        <div id="loading" style="display:none;">
+            <div class="text-center text-muted mb-4">
+                <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                正在加载
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal no-border fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">提示</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                确认删除该评论么？
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="btnDeleteConfirm">确定删除</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal no-border fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectModalLabel">提示</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                确认拒绝该评论么？
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="btnRejectConfirm">确定拒绝</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal no-border fade" id="approvalModal" tabindex="-1" aria-labelledby="approvalModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="approvalModalLabel">提示</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                确认通过该评论么？
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="btnApprovalConfirm">确定通过</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/plugins/dayjs/dayjs.min.js"></script>
+    <script src="~/plugins/dayjs/plugin/istoday.js"></script>
+    <script src="~/plugins/dayjs/plugin/issameorafter.js"></script>
+    <script src="~/plugins/masonry/masonry.pkgd.min.js"></script>
+    <script src="~/plugins/arttemplate/template.js"></script>
+
+    <script>
+
+        // Dayjs Guide:https://dayjs.fenxianglu.cn/
+        dayjs.extend(dayjs_plugin_isToday);
+        dayjs.extend(dayjs_plugin_isSameOrAfter);
+
+        function Page(){
+            this.nomore = @(Model.Finished == true ? "true" : "false");
+            this.loading = false;
+            this.page = 1;
+
+            this.$deleteModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteModal'));
+            this.$rejectModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('rejectModal'));
+            this.$approvalModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('approvalModal'));
+            this.$selectedItem = null;
+
+            this.$loading = $('#loading');
+            this.$loadmore = $('#loadmore');
+            this.$nomore = $('#nomore');
+            this.$list = $('#list');
+
+            this.init();
+
+        }
+
+        Page.prototype = {
+            init:function(){
+                var self=this;
+
+                template.helper('formatDate', function (time) {
+                    var formattedDate = self.formatDate(time);
+                    return formattedDate;
+                });
+
+                this.renderTime();
+                this.bindEvent();
+            },
+            bindEvent:function(){
+                var self = this;
+
+                this.$list.on('click', '.btn-delete', function () {
+                    self.$deleteModal.show();
+                    self.$selectedItem = $(this).closest('.card');
+                });
+
+                this.$list.on('click', '.btn-reject', function () {
+                    self.$rejectModal.show();
+                    self.$selectedItem = $(this).closest('.card');
+                });
+
+                this.$list.on('click', '.btn-approval', function () {
+                    self.$approvalModal.show();
+                    self.$selectedItem = $(this).closest('.card');
+                });
+
+                $('#btnDeleteConfirm').on('click', function () {
+                    var pars = {
+                        id: self.$selectedItem.data('id'),
+                    };
+
+                    $.post('@Url.Action("DeleteComment","Blog")', pars, function () {
+                        self.$deleteModal.hide();
+                        cocoMessage.success('删除成功');
+                        self.$selectedItem.fadeOut();
+                        setTimeout(function () {
+                            window.location.reload();
+                        },300);
+                    });
+                });
+
+                $('#btnRejectConfirm').on('click', function () {
+                    var pars = {
+                        id: self.$selectedItem.data('id'),
+                    };
+
+                    $.post('@Url.Action("Reject", "Blog")', pars, function () {
+                        self.$rejectModal.hide();
+                        cocoMessage.success('拒绝成功');
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 300);
+                    });
+                });
+
+                $('#btnApprovalConfirm').on('click', function () {
+                    var pars = {
+                        id: self.$selectedItem.data('id'),
+                    };
+
+                    $.post('@Url.Action("Approval", "Blog")', pars, function () {
+                        self.$approvalModal.hide();
+                        cocoMessage.success('通过成功');
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 300);
+                    });
+                });
+
+                this.$loadmore.on('click', function () {
+                    self.loadMore();
+                });
+
+                // scroll bottom loadmore
+                $(document).on('scroll', function () {
+                    var $this = $(this);
+                    var height = $(this).height();      //内容高度
+                    var contentH = $(window).height();  //窗口高度
+                    var scrollTop = $(this).scrollTop();//滚动高度
+
+                    var bootomHeight = height - scrollTop - contentH;
+
+                    if (bootomHeight < 3) {
+                        console.log('loadmore')
+                        self.loadMore();
+                    }
+
+                });
+
+            },
+
+            switchLoading:function(status){
+                switch (status) {
+                    case 'loading':
+                        this.$loading.show();
+                        this.$loadmore.hide();
+                        this.$nomore.hide();
+                        break;
+
+                    case 'nomore':
+                        this.$loading.hide();
+                        this.$loadmore.hide();
+                        this.$nomore.show();
+                        break;
+
+                    case 'loadmore':
+                        this.$loading.hide();
+                        this.$loadmore.show();
+                        this.$nomore.hide();
+                        break;
+                }
+            },
+            loadMore:function(){
+                var self=this;
+
+                if (this.loading || this.nomore) { return; }
+
+                this.page++;
+                this.loading = true;
+                this.switchLoading('loading');
+
+                $.ajax({
+                    url: '@Url.Action("LoadMoreComment", "Blog")',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        page: this.page,
+                        sort:this.sort,
+                        search:this.search,
+                        msgType:'system'
+                    },
+                    success: function (res) {
+                        self.loading = false;
+                        if (res.code === 1) {
+                            if (res.data.finished) {
+                                self.nomore = true;
+                                self.switchLoading('nomore');
+                            }else{
+                                self.switchLoading('loadmore');
+                            }
+
+                            if (res.data.list.length > 0) {
+                                var html = template('blog-item-template', res.data.list);
+                                self.$list.append(html);
+                            }
+                        }
+                    },
+                    error: function (xhr, status, error) { }
+                })
+            },
+            formatDate: function (time) {
+                var eventDate = dayjs(time);
+
+                var formattedDate;
+
+                if (eventDate.isToday()) {
+                    // 如果是今天，则显示时分
+                    formattedDate = eventDate.format('HH:mm');
+                } else if (eventDate.isSame(dayjs(), 'year')) {
+                    // 如果是今年内，则显示月日
+                    formattedDate = eventDate.format('MM月DD日');
+                } else {
+                    // 如果是去年或更早，则显示年月日
+                    formattedDate = eventDate.format('YYYY-MM-DD');
+                }
+
+                return formattedDate;
+            },
+            renderTime:function(){
+                var self=this;
+
+                $('.created-date').each(function () {
+                    var $this = $(this);
+                    var time = $this.data('time');
+
+                    var formattedDate = self.formatDate(time);
+
+                    $this.text(formattedDate);
+                });
+            }
+        }
+
+        $(function () {
+            new Page(); // entry
+        });
+
+    </script>
+
+
+    <script id="blog-item-template" type="text/html">
+        {{each}}
+        <div class="card" data-id="{{$value.rowId}}">
+            <div class="card-body">
+                <h5 class="card-title">{{$value.name}}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{$value.createdDate | formatDate}}</h6>
+                <p class="card-text">{{$value.content}}</p>
+                {{ if $value.status==0}}
+                <a href="javascript:void(0);" class="card-link btn-approval">审核通过</a>
+                <a href="javascript:void(0);" class="card-link btn-reject">审核拒绝</a>
+                {{/if}}
+                <a href="javascript:void(0);" class="card-link btn-delete">删除留言</a>
+            </div>
+        </div>
+        {{/each}}
+    </script>
+}

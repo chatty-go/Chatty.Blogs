@@ -1,0 +1,349 @@
+﻿@inject IViewLocalizer L
+@inject IHtmlLocalizer<SharedResource> HtmlSharedResource
+@model Chatty.Blogs.Web.Areas.Admin.ViewModels.HomeIndexViewModel
+@{
+    ViewData["Title"] = L["Page_Title"];
+}
+
+
+<style>
+    .page-home .card-header{
+        border-bottom: none;
+        padding: 30px 20px;
+    }
+
+    .new-creation__menu {
+        display: flex;
+    }
+    .new-creation__menu-item {
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+        margin-right: 10px;
+        border-radius: 8px;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        -webkit-box-align: center;
+        -webkit-align-items: center;
+        -ms-flex-align: center;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .new-creation__menu-item:hover {
+        color: #4945ff;
+        background-color: #f6f7f8;
+    }
+
+    .new-creation__menu-content {
+        text-align: center;
+        position: relative;
+        width: 100%;
+        padding:50px 0;
+    }
+
+    .new-creation__menu-icon {
+        display: inline-block;
+        vertical-align: middle;
+        width: 32px;
+        height: 32px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        margin-bottom: 20px;
+    }
+
+    .new-creation__menu-item:hover svg path {
+        fill: #4945ff;
+    }
+
+    .total-item{
+        border: solid 1px #EBEBEB;
+        border-radius: 10px;
+        padding: 25px;
+        display: flex;
+        align-items: center;
+    }
+
+    .total-item__content{
+        margin-left: 20px;
+    }
+
+    .total-item__content h3{
+        font-size: 18px;
+    }
+
+        .total-item__content p {
+            margin: 0;
+            color: gray;
+        }
+
+    
+
+    .home-svg{
+        fill:var(--main-color);
+    }
+</style>
+
+<div class="page-home">
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="total-item">
+                <i class="total-item__icon">
+                    <svg t="1729779875665" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6197" width="48" height="48"><path class="home-svg" d="M685.568 510.976h-77.824c-5.12 0-10.24 3.072-12.8 7.68l-23.552 42.496c-2.048 4.096-6.656 6.144-10.752 6.144-4.608-0.512-8.192-3.072-10.24-7.168l-47.104-118.784c-4.096-10.752-14.848-17.92-26.624-18.432-11.776 0-22.528 6.656-27.136 17.408L414.72 521.216c-1.536 3.584-4.608 6.144-8.192 6.656-3.584 0.512-7.68-0.512-10.24-3.072l-6.144-6.144c-5.632-5.12-12.8-8.192-19.968-8.192H343.04c-5.12 0-10.24 2.048-13.824 5.632-3.584 3.584-5.632 8.704-5.632 13.824v0.512c0 10.752 8.704 19.456 19.968 19.456h17.92c7.68 0 14.848 3.072 20.48 8.192l23.04 23.04c3.072 3.072 8.192 4.608 12.8 4.096 4.608-1.024 8.704-3.584 10.752-7.68l37.888-76.8c2.048-4.096 6.144-6.656 10.752-6.656 4.608 0 8.704 3.072 10.24 7.168l43.52 103.424c4.096 10.24 13.824 16.896 25.088 17.92 11.264 0.512 21.504-5.12 27.136-14.848l28.16-49.664c2.56-4.608 7.168-7.168 12.8-7.168H686.08c10.752 0 19.456-8.704 19.456-19.456-0.512-11.776-9.216-20.48-19.968-20.48z" p-id="6198" fill="#4945ff"></path><path class="home-svg" d="M512 9.728C234.496 9.728 9.728 234.496 9.728 512c0 277.504 224.768 502.272 502.272 502.272 277.504 0 502.272-224.768 502.272-502.272 0-277.504-224.768-502.272-502.272-502.272z m260.608 596.992c0 21.504-11.776 40.96-30.72 51.2l-202.752 108.032c-16.896 9.216-37.376 9.216-54.272 0l-202.752-108.032c-18.944-10.24-30.72-29.696-30.72-51.2V415.744c0-21.504 11.776-41.472 31.232-51.2l202.752-106.496c16.896-8.704 36.864-8.704 53.76 0l202.752 107.008c18.944 10.24 30.72 29.696 30.72 51.2v190.464z" p-id="6199" fill="#4945ff"></path></svg>
+                </i>
+                <div class="total-item__content">
+                    <h3>@Model.TotalVisitor</h3>
+                    <p>访问量</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="total-item">
+                <i class="total-item__icon">
+                    <svg t="1729779717406" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4978" width="48" height="48"><path class="home-svg" d="M512 0c282.773333 0 512 229.226667 512 512S794.773333 1024 512 1024 0 794.773333 0 512 229.226667 0 512 0z m50.389333 277.738667h-3.776c-72.533333 0-92.309333 69.696-94.186666 108.288 0 91.370667 53.696 128.106667 53.696 128.106666 4.586667 6.272 6.912 13.909333 6.592 21.674667a24.192 24.192 0 0 1-8.469334 12.202667c-30.144 25.429333-137.514667 50.858667-145.045333 105.472-5.653333 23.552-37.674667 59.306667 68.757333 74.410666 40.618667 4.778667 81.514667 6.976 122.432 6.570667 211.498667 0 204.352-37.354667 193.834667-66.410667l-0.810667-2.218666-0.810666-2.176-0.768-2.133334a63.573333 63.573333 0 0 1-2.133334-7.104c-6.613333-54.613333-114.901333-80.981333-145.045333-106.410666a25.045333 25.045333 0 0 1-5.653333-15.04c-0.554667-6.4 0.426667-12.864 2.816-18.837334 0 0 53.696-30.144 52.736-128.106666-1.877333-38.613333-24.405333-108.288-94.165334-108.288z m-163.882666 52.8h-2.816c-57.450667 0-73.450667 55.573333-74.410667 87.594666a121.642667 121.642667 0 0 0 41.493333 102.656c2.346667 4.650667 3.349333 9.877333 2.816 15.061334a26.837333 26.837333 0 0 1-3.754666 12.202666c-23.552 20.714667-103.594667 41.493333-109.248 85.696a168.106667 168.106667 0 0 0-0.96 37.696c17.194667 9.130667 35.562667 15.786667 54.613333 19.754667 3.029333-9.621333 5.546667-19.413333 7.552-29.290667 4.693333-28.245333 39.552-71.573333 124.309333-105.472l0.064 0.128c6.016-2.048 11.733333-4.906667 16.96-8.469333 10.389333-6.592 16.96-19.754667-0.938666-36.714667-61.226667-92.309333-38.613333-153.536-29.290667-176.128a73.258667 73.258667 0 0 0-26.389333-4.714666z" fill="#4945ff" p-id="4979"></path></svg>
+                </i>
+                <div class="total-item__content">
+                    <h3>@Model.TotalUser</h3>
+                    <p>访问用户量</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="total-item">
+                <i class="total-item__icon">
+                    <svg t="1729779965989" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="11270" width="48" height="48"><path class="home-svg" d="M512 512m-491.52 0a491.52 491.52 0 1 0 983.04 0 491.52 491.52 0 1 0-983.04 0Z" fill="#4945ff" p-id="11271"></path><path d="M710.51264 500.79744c0 77.43488 0.34816 146.88256-0.18432 216.30976-0.18432 23.83872-15.7696 34.38592-37.64224 34.46784-114.64704 0.4096-229.29408 0.57344-343.94112-0.1024-24.65792-0.14336-36.20864-15.40096-36.18816-40.12032 0.12288-122.368 0.04096-244.75648-0.02048-367.12448-0.02048-27.21792 15.29856-40.57088 40.63232-40.89856 68.25984-0.86016 136.56064-0.4096 204.82048-0.16384 7.00416 0.02048 17.2032-3.03104 19.08736 7.45472 1.82272 10.21952-6.18496 17.48992-14.5408 20.19328-9.50272 3.072-20.1728 3.2768-30.35136 3.33824-52.81792 0.28672-105.63584 0.75776-158.43328-0.2048-20.23424-0.36864-30.3104 3.74784-30.1056 27.32032 1.024 110.75584 0.75776 221.55264 0.12288 332.32896-0.12288 19.61984 5.9392 27.38176 26.46016 27.2384 100.47488-0.7168 200.97024-0.8192 301.44512 0.12288 22.67136 0.2048 28.4672-8.88832 27.97568-29.7984-1.08544-47.63648 0.63488-95.3344-0.75776-142.9504-0.63488-20.6848 7.65952-32.78848 31.62112-47.4112z" fill="#FFFFFF" p-id="11272"></path><path d="M788.64384 333.5168c1.24928 14.60224-13.96736 29.98272-27.8528 44.25728-60.74368 62.32064-123.20768 122.96192-183.84896 185.38496-37.21216 38.2976-88.73984 42.47552-134.81984 58.73664-15.27808 5.38624-23.42912-6.3488-18.67776-28.99968 16.15872-76.82048 55.7056-136.0896 115.24096-186.28608 44.48256-37.51936 82.96448-82.06336 124.80512-122.75712 20.84864-20.2752 45.4656-37.25312 75.28448-22.44608 25.31328 12.55424 47.90272 30.69952 49.8688 72.11008z m-32.5632-7.49568c3.01056-16.4864-10.6496-24.82176-21.4016-32.39936-12.0832-8.51968-26.8288-8.56064-38.62528 3.13344-70.06208 69.36576-140.9024 137.95328-209.18272 209.01888-12.82048 13.35296-16.40448 36.352-22.03648 55.56224-3.42016 11.6736 3.46112 23.38816 16.1792 16.95744 21.25824-10.77248 46.57152-10.28096 65.18784-29.16352 62.23872-63.01696 126.3616-124.14976 188.78464-186.9824 9.23648-9.3184 21.48352-19.00544 21.0944-36.12672z" fill="#FFFFFF" p-id="11273"></path></svg>
+                </i>
+                <div class="total-item__content">
+                    <h3>@Model.TotalArticle</h3>
+                    <p>文章数</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <a class="total-item" href="@Url.Action("Comment","Blog")">
+                <i class="total-item__icon">
+                    <svg t="1729779965989" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="11270" width="48" height="48"><path class="home-svg" d="M512 512m-491.52 0a491.52 491.52 0 1 0 983.04 0 491.52 491.52 0 1 0-983.04 0Z" fill="#4945ff" p-id="11271"></path><path d="M710.51264 500.79744c0 77.43488 0.34816 146.88256-0.18432 216.30976-0.18432 23.83872-15.7696 34.38592-37.64224 34.46784-114.64704 0.4096-229.29408 0.57344-343.94112-0.1024-24.65792-0.14336-36.20864-15.40096-36.18816-40.12032 0.12288-122.368 0.04096-244.75648-0.02048-367.12448-0.02048-27.21792 15.29856-40.57088 40.63232-40.89856 68.25984-0.86016 136.56064-0.4096 204.82048-0.16384 7.00416 0.02048 17.2032-3.03104 19.08736 7.45472 1.82272 10.21952-6.18496 17.48992-14.5408 20.19328-9.50272 3.072-20.1728 3.2768-30.35136 3.33824-52.81792 0.28672-105.63584 0.75776-158.43328-0.2048-20.23424-0.36864-30.3104 3.74784-30.1056 27.32032 1.024 110.75584 0.75776 221.55264 0.12288 332.32896-0.12288 19.61984 5.9392 27.38176 26.46016 27.2384 100.47488-0.7168 200.97024-0.8192 301.44512 0.12288 22.67136 0.2048 28.4672-8.88832 27.97568-29.7984-1.08544-47.63648 0.63488-95.3344-0.75776-142.9504-0.63488-20.6848 7.65952-32.78848 31.62112-47.4112z" fill="#FFFFFF" p-id="11272"></path><path d="M788.64384 333.5168c1.24928 14.60224-13.96736 29.98272-27.8528 44.25728-60.74368 62.32064-123.20768 122.96192-183.84896 185.38496-37.21216 38.2976-88.73984 42.47552-134.81984 58.73664-15.27808 5.38624-23.42912-6.3488-18.67776-28.99968 16.15872-76.82048 55.7056-136.0896 115.24096-186.28608 44.48256-37.51936 82.96448-82.06336 124.80512-122.75712 20.84864-20.2752 45.4656-37.25312 75.28448-22.44608 25.31328 12.55424 47.90272 30.69952 49.8688 72.11008z m-32.5632-7.49568c3.01056-16.4864-10.6496-24.82176-21.4016-32.39936-12.0832-8.51968-26.8288-8.56064-38.62528 3.13344-70.06208 69.36576-140.9024 137.95328-209.18272 209.01888-12.82048 13.35296-16.40448 36.352-22.03648 55.56224-3.42016 11.6736 3.46112 23.38816 16.1792 16.95744 21.25824-10.77248 46.57152-10.28096 65.18784-29.16352 62.23872-63.01696 126.3616-124.14976 188.78464-186.9824 9.23648-9.3184 21.48352-19.00544 21.0944-36.12672z" fill="#FFFFFF" p-id="11273"></path></svg>
+                </i>
+                <div class="total-item__content">
+                    <h3>@Model.TotalArticle</h3>
+                    <p>文章评论</p>
+                </div>
+            </a>
+        </div>
+
+    </div>
+    
+    <div class="card mt-4">
+        <div class="card-header">
+            <h3>@L["New_Creation_Title"]</h3>
+        </div>
+        <div class="card-body">
+            <div class="new-creation__menu">
+                <div class="new-creation__menu-item">
+                    <a href="@Url.Action("NewPost","Blog")" target="_blank" class="new-creation__menu-content">
+                        <i class="new-creation__menu-icon">
+                            <svg t="1728478596340" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4747" width="32" height="32"><path d="M224.7 320.7h95.6v159.4c0 17.6 14.3 31.9 31.9 31.9 17.6 0 31.9-14.3 31.9-31.9V320.7h95.6c17.6 0 31.9-14.3 31.9-31.9 0-17.6-14.3-31.9-31.9-31.9h-255c-17.6 0-31.9 14.3-31.9 31.9 0.1 17.6 14.3 31.9 31.9 31.9zM607.3 320.7h191.3c17.6 0 31.9-14.3 31.9-31.9 0-17.6-14.3-31.9-31.9-31.9H607.3c-17.6 0-31.9 14.3-31.9 31.9s14.3 31.9 31.9 31.9zM798.6 448.2H607.3c-17.6 0-31.9 14.3-31.9 31.9 0 17.6 14.3 31.9 31.9 31.9h191.3c17.6 0 31.9-14.3 31.9-31.9 0-17.6-14.3-31.9-31.9-31.9zM798.6 575.7H224.7c-17.6 0-31.9 14.3-31.9 31.9 0 17.6 14.3 31.9 31.9 31.9h573.9c17.6 0 31.9-14.3 31.9-31.9 0-17.6-14.3-31.9-31.9-31.9zM798.6 703.3H224.7c-17.6 0-31.9 14.3-31.9 31.9s14.3 31.9 31.9 31.9h573.9c17.6 0 31.9-14.3 31.9-31.9s-14.3-31.9-31.9-31.9z" fill="#515151" p-id="4748"></path><path d="M920.1 959.3H104.2c-21.7 0-39.3-17.6-39.3-39.3V104.2c0-21.7 17.6-39.3 39.3-39.3h815.9c21.7 0 39.3 17.6 39.3 39.3v815.9c-0.1 21.6-17.7 39.2-39.3 39.2zM121 903.2h782.2V121H121v782.2z" fill="#515151" p-id="4749"></path></svg>
+                        </i>
+                        <div class="new-creation__menu-text">富文本</div>
+                    </a>
+                </div>
+
+                <div class="new-creation__menu-item">
+                    <a href="@Url.Action("NewPost","Blog")" target="_blank" class="new-creation__menu-content">
+                        <i class="new-creation__menu-icon">
+                            <svg t="1728478687828" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5837" width="32" height="32"><path d="M903.104 0a120.224 120.224 0 0 1 119.872 119.936v783.2a120.224 120.224 0 0 1-119.84 119.872H119.872A120.224 120.224 0 0 1 0 903.168V119.968A120.192 120.192 0 0 1 119.84 0.032h0.032z m-18.656 85.248H138.528a52.8 52.8 0 0 0-37.504 15.68c-9.696 9.6-15.744 22.88-15.776 37.6v745.92c0 14.08 5.632 27.52 15.68 37.6 9.6 9.664 22.88 15.68 37.6 15.68h745.92a52.8 52.8 0 0 0 37.504-15.68 52.8 52.8 0 0 0 15.776-37.504V138.624v-0.032c0-14.72-5.984-28.032-15.68-37.632a52.8 52.8 0 0 0-37.6-15.68zM312.864 255.744l184.896 311.328c7.744 17.056 13.888 30.848 18.336 41.344l26.016-56.608 12.032-25.408 171.168-270.656h127.2v511.488h-91.2V339.104l-207.488 342.88h-85.408l-206.72-350.112v435.36H170.56V255.744h142.368z" p-id="5838" fill="#515151"></path></svg>
+                        </i>
+                        <div class="new-creation__menu-text">Markdown</div>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>近期草稿[@Model.Articles.Count]</h3>
+        </div>
+        <div class="card-body article grid">
+            @foreach (var item in Model.Articles)
+            {
+                <div class="grid-item">
+                    @if (item.Status == 0)
+                    {
+                        <span class="badge bg-primary status">@L["Page_Article_Status"]</span>
+                    }
+                    <div class="card">
+                        <i class="cover-url" style="background-image:url('@item.CoverUrl')"></i>
+                        <div class="card-body">
+                            <a href="@Url.Action("Detail","Blog")/@item.RowId" class="card-title ">
+                                @(item.Title ?? "未命名文章")
+                            </a>
+                            <p class="card-text ">@item.Quote</p>
+                            <p class="card-text"><small class="text-muted created-date" data-time="@item.CreatedDate"></small></p>
+                        </div>
+                        <div class="grid-item__icon-btn">
+                            <div class="d-flex">
+                                <a class="card-link btn-delete cursor-pointer" data-id="@item.RowId"><i class="ti-trash"></i></a>
+                                <a href="@Url.Action("NewPost","Blog")/@item.RowId" target="_blank" class="card-link  cursor-pointer"><i class="ti-pencil-alt"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal no-border fade" id="modalDelete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">提示</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                您正在删除以下文章，确认删除后无法恢复，请确认？
+                <p id="modalArticleName"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="btnDeleteConfirm">确定删除</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/plugins/dayjs/dayjs.min.js"></script>
+    <script src="~/plugins/dayjs/plugin/istoday.js"></script>
+    <script src="~/plugins/dayjs/plugin/issameorafter.js"></script>
+    <script src="~/plugins/masonry/masonry.pkgd.min.js"></script>
+
+    <script>
+        dayjs.extend(dayjs_plugin_isToday);
+        dayjs.extend(dayjs_plugin_isSameOrAfter);
+
+        function Page() {
+           
+            this.selectedId = null;
+            this.$selectedItem = null;
+            this.selectedName = null;
+
+            this.$grid = null;
+            this.init();
+        }
+
+        Page.prototype = {
+            init: function () {
+                var self = this;
+
+                this.$grid = $('.grid').masonry({
+                    itemSelector: '.grid-item',
+                    columnWidth: 200,
+                    gutter: 10
+                });
+
+                this.renderTime();
+                this.bindEvent();
+            },
+            bindEvent: function () {
+                var self = this;
+
+                // delete article event
+                $('.article').on('click', '.btn-delete', function () {
+                    var $this = $(this);
+                    self.selectedId = $this.data('id');
+                    self.$selectedItem = $this.closest('.grid-item');
+                    self.selectedName = self.$selectedItem.find('.card-title').text();
+                    $('#modalArticleName').text('【' + self.selectedName + '】');
+
+                    var modal = self.getModal('modalDelete');
+                    modal.show();
+                });
+
+                $('#btnDeleteConfirm').on('click', function () {
+                    $.ajax({
+                        url: '@Url.Action("Delete", "Blog")',
+                        type: 'post',
+                        dataType: 'json',
+                        data: {
+                            id: self.selectedId
+                        },
+                        success: function (res) {
+                            if (res.code === 1) {
+
+                                self.$grid.masonry('remove', self.$selectedItem).masonry('layout');
+                                self.$selectedItem = null;
+                                self.selectedId = null;
+
+                                window.location.reload();
+
+                            } else {
+                                cocoMessage.error(res.msg);
+                            }
+                        },
+                        error: function (xhr, status, error) { }
+                    });
+                });
+
+            },
+
+            getModal: function (id) {
+                var modal = bootstrap.Modal.getOrCreateInstance(document.getElementById(id));
+
+                return modal;
+            },
+
+            formatDate: function (time) {
+                var eventDate = dayjs(time);
+
+                var formattedDate;
+
+                if (eventDate.isToday()) {
+                    // 如果是今天，则显示时分
+                    formattedDate = eventDate.format('HH:mm');
+                } else if (eventDate.isSame(dayjs(), 'year')) {
+                    // 如果是今年内，则显示月日
+                    formattedDate = eventDate.format('MM月DD日');
+                } else {
+                    // 如果是去年或更早，则显示年月日
+                    formattedDate = eventDate.format('YYYY-MM-DD');
+                }
+
+                return formattedDate;
+            },
+            renderTime: function () {
+                var self = this;
+
+                $('.created-date').each(function () {
+                    var $this = $(this);
+                    var time = $this.data('time');
+
+                    var formattedDate = self.formatDate(time);
+
+                    $this.text('更新于 ' + formattedDate);
+                });
+            }
+        }
+
+        $(function () {
+            new Page(); // entry
+        });
+
+    </script>
+}

@@ -1,0 +1,22 @@
+﻿@inject IViewLocalizer L
+@{
+    ViewData["Title"] = L["Page_Title"];
+}
+
+<style>
+    .notfound{
+        text-align: center;
+        margin-top: 100px;
+        color: gray;
+    }
+
+    .notfound h1{
+        margin:10px 0;
+    }
+</style>
+
+<div class="notfound">
+    <img src="~/svg/notFound.svg" alt="not found" />
+    <h1>@L["Page_Blog_NotFound_Ttile"]</h1>
+    <p>@L["Page_Blog_NotFound_Message", @ViewData["Not_Found_ID"]]</p>
+</div>

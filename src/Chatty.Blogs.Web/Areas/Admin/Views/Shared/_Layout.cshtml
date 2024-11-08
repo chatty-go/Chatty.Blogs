@@ -1,0 +1,245 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Chatty.Blogs</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/admin/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/admin/css/app.css" />
+    <link rel="stylesheet" href="~/admin/css/themify.icon.css" />
+</head>
+<body>
+    @using System.Security.Claims;
+    @using Microsoft.AspNetCore.Http.Features
+    @using Microsoft.AspNetCore.Localization
+    @using Microsoft.AspNetCore.Mvc.Localization
+    @using Microsoft.Extensions.Options
+    @inject IViewLocalizer L
+    @inject IOptions<RequestLocalizationOptions> LocOptions
+    @{
+        var path = ViewContext.HttpContext.Request.Path;
+        var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+
+        var cultureItems = LocOptions.Value
+        .SupportedUICultures
+        .Select(c => new SelectListItem { Value = c.Name, Text = c.DisplayName })
+        .ToList();
+
+        var currentCultureDisplayName = requestCulture.RequestCulture.UICulture.DisplayName;
+
+        var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value}";
+    }
+
+    <!-- Preloader -->
+    <div class="preloader">
+        <div class="preloader-icon"></div>
+    </div>
+    <!-- ./ Preloader -->
+
+    <div class="layout-wrapper">
+
+        <!-- Header -->
+        <div class="header d-print-none">
+            <div class="header-container">
+                <div class="header-body">
+                    <div class="header-body-left">
+                        <ul class="navbar-nav">
+                            <li class="nav-item navigation-toggler">
+                                <a href="#" class="nav-link">
+                                    <i class="ti-menu"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <div class="header-search-form">
+                                    <form>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <button class="btn">
+                                                    <i class="ti-search"></i>
+                                                </button>
+                                            </div>
+                                            <input type="text" class="form-control" placeholder="@L["Search something"]">
+                                            <div class="input-group-append">
+                                                <button class="btn header-search-close-btn">
+                                                    <i data-feather="x"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="header-body-right">
+                        <ul class="navbar-nav">
+                            <li class="nav-item dropdown" id="dropwodn_language">
+                                <a href="#" class="nav-link dropdown-toggle" aria-expanded="false" id="dropdownLanguage_target" data-bs-toggle="dropdown" title="@L["Multiple Language"]">
+                                    <i class="ti-world"></i>
+                                    <span>@currentCultureDisplayName</span>
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownLanguage_target" data-url="@returnUrl">
+                                    @foreach (var culture in cultureItems)
+                                    {
+                                        @if (@culture.Text == currentCultureDisplayName)
+                                        {
+                                            <li><a data-value="@culture.Value" aria-current="true" class="dropdown-item active" href="#">@culture.Text</a></li>
+                                        }
+                                        else
+                                        {
+                                            <li><a data-value="@culture.Value" class="dropdown-item" href="#">@culture.Text</a></li>
+                                        }
+
+                                    }
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link mobile-header-search-btn" title="Search">
+                                    <i class="ti-search"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link" title="Dark">
+                                    <i class="ti-light-bulb"></i>
+                                </a>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                                @await Component.InvokeAsync("Message")
+                            </li>
+
+                            <li class="nav-item dropdown">
+                                <a href="@Url.Action("Index","Setting")" class="nav-link" title="Settings" >
+                                    <i class="ti-settings"></i>
+                                </a>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                                <a href="#" id="dropdownMenuProfile" class="nav-link profile-nav-link dropdown-toggle" title="User menu"
+                                   data-bs-toggle="dropdown">
+                                    <span class="mr-2 d-sm-inline d-none">@Context.User.Identity?.Name</span>
+                                    <figure class="avatar avatar-sm">
+                                        <img src="@Context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Uri)?.Value" class="rounded-circle"
+                                             alt="avatar">
+                                    </figure>
+                                </a>
+                                <div aria-labelledby="dropdownMenuProfile" class="dropdown-menu dropdown-menu-right dropdown-menu-big">
+                                    <div class="text-center py-4" data-background-image="~/admin/img/image1.jpg">
+                                        <figure class="avatar avatar-lg mb-3 border-0">
+                                            <img src="@Context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Uri)?.Value" class="rounded-circle"
+                                                 alt="avatar">
+                                        </figure>
+                                        <h5 class="mb-0">@Context.User.Identity?.Name</h5>
+                                    </div>
+                                    <div class="list-group list-group-flush">
+                                        <a href="@Url.Action("Index","Setting")" class="list-group-item">
+                                            <i class="ti-settings"></i>
+                                            @L["Menu_User_Action_Setting"]
+                                        </a>
+                                        <a asp-area="Admin" asp-controller="Login" asp-action="Signout" class="list-group-item text-danger"
+                                           data-sidebar-target="#settings">
+                                            <i class="ti-power-off"></i>
+                                           @L["Menu_User_Action_SignOut"]
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item header-toggler">
+                        <a href="#" class="nav-link">
+                            <i class="ti-arrow-down"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item sidebar-toggler">
+                        <a href="#" class="nav-link">
+                            <i class="ti-cloud"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- ./ Header -->
+
+        <div class="content-wrapper">
+            <!-- begin::navigation -->
+            <div class="navigation">
+                <div class="logo">
+                    <a href="@Url.Action("Index","Home",new { area="Admin"})">
+                        <img src="~/admin/svg/logo.svg" alt="logo">
+                    </a>
+                </div>
+                <ul>
+                    <li>
+                        <a href="@Url.Action("Index","Home",new { area="Admin"})" class="@(path.StartsWithSegments("/Admin/Home")?"active":"")">
+                            <i class="nav-link-icon ti-home"></i>
+                            <span class="nav-link-label">
+                                @L["Menu_Home"]
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Index","Blog",new { area="Admin"})" class="@(path.StartsWithSegments("/Admin/Blog")?"active":"")">
+                            <i class="nav-link-icon ti-bookmark-alt"></i>
+                            <span class="nav-link-label">@L["Menu_Blog"]</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Index","Category",new { area="Admin"})" class="@(path.StartsWithSegments("/Admin/Category")?"active":"")">
+                            <i class="nav-link-icon ti-file"></i>
+                            <span class="nav-link-label">@L["Menu_Content"]</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Index","Series",new { area="Admin"})" class="@(path.StartsWithSegments("/Admin/Series")?"active":"")">
+                            <i class="nav-link-icon ti-pulse"></i>
+                            <span class="nav-link-label">@L["Menu_Series"]</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Index","Assets",new { area="Admin"})" class="@(path=="/Admin/Assets"?"active":"")">
+                            <i class="nav-link-icon ti-image"></i>
+                            <span class="nav-link-label">@L["Menu_Assets"]</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="@Url.Action("Index","Ai",new { area="Admin"})" class="@(path=="/Admin/Ai"?"active":"")">
+                            <i class="nav-link-icon ti-shield"></i>
+                            <span class="nav-link-label">@L["Menu_AI"]</span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="@Url.Action("Index","Setting",new { area="Admin"})" class="@(path=="/Admin/Setting"?"active":"")">
+                            <i class="nav-link-icon ti-settings"></i>
+                            <span class="nav-link-label">@L["Menu_Setting"]</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="content-body">
+                <div class="content">
+                    @RenderBody()
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/plugins/message/coco-message.min.js"></script>
+    <script src="~/plugins/nicescroll/jquery.nicescroll.min.js"></script>
+    <script src="~/admin/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

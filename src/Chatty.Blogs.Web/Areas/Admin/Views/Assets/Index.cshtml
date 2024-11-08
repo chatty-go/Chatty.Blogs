@@ -1,0 +1,925 @@
+﻿@inject IViewLocalizer L
+@model Chatty.Blogs.Web.Areas.Admin.ViewModels.AssetsIndexViewModel
+@{
+    ViewData["Title"] = L["Page_Title"];
+}
+
+<link href="~/admin/plugins/webuploader/webuploader.css" rel="stylesheet" />
+<link href="~/admin/plugins/webuploader/custom.uploader.css" rel="stylesheet" />
+<link href="~/admin/plugins/preview/preview.css" rel="stylesheet" />
+
+<style>
+.filters {
+    padding: 20px 15px 30px 15px;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    
+}
+.filter-prefix {
+        font-size: 12px;
+        color: gray;
+        display: inline-flex;
+        align-items: center;
+    }
+
+.thumb {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.thumb-item:hover .thumb-item-img {
+        box-shadow: 0 0 0 2px var(--main-color) inset;
+}
+
+.thumb-item:hover .copy {
+    opacity: 1;
+}
+
+.thumb-item {
+    cursor: pointer;
+    position: relative;
+    width: calc((100% - 5*30px)/6);
+    margin: 0 30px 30px 0;
+    text-align: center;
+
+    
+}
+
+.thumb-item-img {
+        display: block;
+        width: 100%;
+        height: auto;
+        background-size: contain;
+        background-position: 50% 50%;
+        background-repeat: no-repeat;
+        padding-bottom: 100%;
+        border: 2px solid transparent;
+        border-radius: 3px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .title {
+        display: block;
+        width: auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        word-wrap: normal;
+        font-weight: 400;
+        line-height: 40px;
+        position:relative;
+        margin-top:6px;
+    }
+
+    .copy {
+        position: absolute;
+        z-index: 10;
+        right: 8px;
+        top: 8px;
+        opacity: 0;
+    }
+
+.editable {
+    cursor: pointer;
+    }
+
+
+    .editable.loading::after{
+            content: " ";
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            vertical-align: -.125em;
+            border: .1em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            -webkit-animation: .75s linear infinite spinner-border;
+            animation: .75s linear infinite spinner-border;
+            position: absolute;
+            z-index: 1;
+            top: 10px;
+            right: 8px;
+    }
+
+ </style>
+
+<div class="d-flex justify-content-between align-items-center">
+    <h1>@L["Page_Title"] [@Model.Total]</h1>
+
+    <div>
+        <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#uploadModal">
+            @L["Page_Action_New"]
+        </button>
+    </div>
+</div>
+
+<div class="page-body">
+    <ul class="nav nav-pills mt-3" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">@L["Page_Tab_Picture"]</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">@L["Page_Tab_Audio"]</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">@L["Page_Tab_Video"]</button>
+        </li>
+    </ul>
+    <div class="tab-content" id="pills-tabContent">
+        <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+            
+
+            <div class="d-flex mt-4 mb-4">
+                <span class="me-2">分组</span>
+                <div>
+                    <input type="radio" class="btn-check" name="options-outlined" id="c1" autocomplete="off" checked>
+                    <label class="btn btn-outline-primary btn-sm" for="c1">全部</label>
+
+                    <input type="radio" class="btn-check" name="options-outlined" id="c2" autocomplete="off">
+                    <label class="btn btn-outline-primary btn-sm" for="c2">默认</label>
+
+                    <input type="radio" class="btn-check" name="options-outlined" id="c3" autocomplete="off">
+                    <label class="btn btn-outline-primary btn-sm" for="c3">我的图片</label>
+
+                    <input type="radio" class="btn-check" name="options-outlined" id="c4" autocomplete="off">
+                    <label class="btn btn-outline-primary btn-sm" for="c4">陌生图片</label>
+                </div>
+            </div>
+            
+            <div class="thumb" id="galerys">
+                @foreach (var item in Model.List)
+                {
+                    <div class="thumb-item" data-original="@item.Url" data-id="@item.RowId">
+                        <div class="copy">
+                            <button type="button" class="mr-1 btn btn-outline-primary btn-sm btn-preview" style="border-radius: 0;"><i class="ti-fullscreen"></i></button>
+                            <button type="button" class="mr-1 btn btn-outline-primary btn-sm" style="border-radius: 0;"><i class="ti-layers"></i></button>
+                            <button type="button" class="btn btn-outline-primary btn-sm btn-delete" style="border-radius: 0;"><i class="ti-trash"></i></button>
+                        </div>
+                        <i role="img" class="thumb-item-img" style="background-image:url('@item.Url')"></i>
+                        <div class="title">@item.Name</div>
+                    </div>
+                }
+            </div>
+
+            @if (Model.List.Count == 0)
+            {
+                <div class="text-center">
+                    <img src="@Url.Content("~/admin/svg/icon-empty.svg")" alt="no empty" />
+                    <p class="mt-1">@L["Page_Post_Empty"]</p>
+                </div>
+            }
+            else
+            {
+                <div>
+                    <div id="nomore" style="@(Model.Finished==true?"":"display:none;")">
+                        <div class="text-center text-muted mb-4">没有更多了</div>
+                    </div>
+
+                    <div id="loadmore" style="@(Model.Finished==false?"":"display:none;")">
+                        <div class="text-center text-muted mb-4 text-cursor"><i class="ti-angle-down me-2"></i>加载更多</div>
+                    </div>
+
+                    <div id="loading" style="display:none;">
+                        <div class="text-center text-muted mb-4">
+                            <div class="spinner-border spinner-border-sm" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            正在加载
+                        </div>
+                    </div>
+                </div>
+            }
+            
+
+        </div>
+        <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">2...</div>
+        <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">3...</div>
+    </div>
+</div>
+
+<!--Upload Modal -->
+<div class="modal fade no-border" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">素材上传</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="uploader" class="wu-example">
+                    <div class="queueList">
+                        <div id="dndArea" class="uploader-placeholder">
+                            <div id="filePicker"></div>
+                            <p>或将照片拖到这里，单次最多可选300张</p>
+                        </div>
+                    </div>
+                    <div class="statusBar" style="display:none;">
+                        <div class="progress">
+                            <span class="text">0%</span>
+                            <span class="percentage"></span>
+                        </div><div class="info"></div>
+                        <div class="btns">
+                            <div id="filePicker2"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="uploadBtn">开始上传</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal no-border fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">提示</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                您正在删除图片，删除后无法恢复，请确认？
+                <p id="modal-delete-name"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="btnDeleteConfirm">确定删除</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="~/admin/plugins/webuploader/webuploader.min.js"></script>
+    <script src="~/plugins/arttemplate/template.js"></script>
+    <script src="~/admin/plugins/preview/preview.js"></script>
+
+    <script>
+        (function ($,window) {
+
+            function Page() {
+
+                this.nomore = @(Model.Finished == true ? "true" : "false");
+                this.loading = false;
+                this.page = 1;
+                this.$deleteModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteModal'));
+                this.selectedId = null;
+                this.$seletedItem = null;
+
+
+                this.$loading = $('#loading');
+                this.$loadmore = $('#loadmore');
+                this.$nomore = $('#nomore');
+                this.$list = $('#galerys');
+
+                this.$uploadModal = $('#uploadModal');
+                this.uploader = null;
+                this.$uploader = $('#uploader');
+                this.$uploadBtn = $('#uploadBtn');
+
+                this.init();
+
+            }
+
+            Page.prototype = {
+                init: function () {
+
+                    this.bindEvent();
+
+                    var preview = new Preview({
+                        imgWrap: 'galerys' // 指定该容器里的图片点击预览
+                    });
+                },
+                bindEvent: function () {
+                    var self=this;
+
+                    this.$list.on('click', '.btn-delete', function () {
+                        var $item = $(this).closest('.thumb-item');
+                        $('#modal-delete-name').text('【' + $item.find('.title').text() + '】');
+                        self.$deleteModal.show();
+
+                        self.selectedId = $item.data('id');
+                        self.$seletedItem = $item;
+                    });
+
+                    $('#btnDeleteConfirm').on('click', function () { 
+                        $.post('@Url.Action("Delete", "Assets")',
+                            { id: self.selectedId }, function (res) {
+                                self.$seletedItem.fadeOut();
+                                setTimeout(function () {
+                                    window.location.reload();
+                                },300);
+                            });
+                    });
+
+                    this.$list.on('click', '.title', function (e) {
+                        e.preventDefault();
+                        var $target = $(this);
+
+                        if ($target.hasClass('editable')) {
+                            return;
+                        }
+
+                        $target.addClass('editable');
+
+                        var $input = $('<input type="text" data-value="' + $target.text() + '" class="form-control" value="' + $target.text() + '" />');
+
+                        $target.html($input);
+                        $input.focus();
+                        var len = $input.val().length;
+                        $input[0].setSelectionRange && $input[0].setSelectionRange(len, len);
+
+                        $input.on('blur', function () {
+
+                            var $item = $input.closest('.thumb-item');
+                            var value = $input.data('value');
+                            var newValue = this.value;
+
+                            if (value !== newValue) {
+
+                                $target.addClass('loading');
+
+                                self.updateName($item.data('id'), newValue, function (res) {
+                                    $target.removeClass('editable loading').text(newValue);
+                                });
+                            }else{
+                                $target.removeClass('editable').text(newValue);
+                            }
+                            
+                        });
+                            
+                    });
+
+                    this.$uploadModal.on('shown.bs.modal', function () {
+                        self.initUploader();
+                    });
+
+                    this.$loadmore.on('click', function () {
+                        self.loadMore();
+                    });
+
+                     // scroll bottom loadmore
+                    $(document).on('scroll', function () {
+                        var $this = $(this);
+                        var height = $(this).height();      //内容高度
+                        var contentH = $(window).height();  //窗口高度
+                        var scrollTop = $(this).scrollTop();//滚动高度
+
+                        var bootomHeight = height - scrollTop - contentH;
+
+                        if (bootomHeight < 3) {
+                            console.log('loadmore')
+                            self.loadMore();
+                        }
+
+                    });
+                },
+                
+                switchLoading:function(status){
+                    switch (status) {
+                        case 'loading':
+                            this.$loading.show();
+                            this.$loadmore.hide();
+                            this.$nomore.hide();
+                            break;
+
+                        case 'nomore':
+                            this.$loading.hide();
+                            this.$loadmore.hide();
+                            this.$nomore.show();
+                            break;
+
+                        case 'loadmore':
+                            this.$loading.hide();
+                            this.$loadmore.show();
+                            this.$nomore.hide();
+                            break;
+                    }
+                },
+                loadMore:function(){
+                    var self=this;
+
+                    if (this.loading || this.nomore) { return; }
+
+                    this.page++;
+                    this.loading = true;
+                    this.switchLoading('loading');
+
+                    $.ajax({
+                        url: '@Url.Action("Loadmore", "Assets")',
+                        type: 'GET',
+                        dataType: 'json',
+                        data: {
+                            page: this.page,
+                            sort:this.sort,
+                            search:this.search
+                        },
+                        success: function (res) {
+                            self.loading = false;
+                            if (res.code === 1) {
+                                if (res.data.finished) {
+                                    self.nomore = true;
+                                    self.switchLoading('nomore');
+                                }else{
+                                    self.switchLoading('loadmore');
+                                }
+
+                                if (res.data.list.length > 0) {
+                                    var html = template('tpl_thumb_item', res.data.list);
+                                    self.$list.append(html);
+                                }
+                            }
+                        },
+                        error: function (xhr, status, error) { }
+                    })
+                },
+                updateName:function(rowId,name,callback){
+
+                    var pars = {
+                        rowId:rowId,
+                        name:name
+                    };
+
+                    $.post('@Url.Action("UpdateName", "Assets")', pars, function (res) { 
+                        callback && callback();
+                    });
+                },
+                initUploader: function () {
+                    var self = this;
+
+                    var BASE_URL = "";
+                    var $wrap = $('#uploader'),
+
+                        // 图片容器
+                        $queue = $('<ul class="filelist"></ul>')
+                            .appendTo($wrap.find('.queueList')),
+
+                        // 状态栏，包括进度和控制按钮
+                        $statusBar = $wrap.find('.statusBar'),
+
+                        // 文件总体选择信息。
+                        $info = $statusBar.find('.info'),
+
+                        // 没选择文件之前的内容。
+                        $placeHolder = $wrap.find('.uploader-placeholder'),
+
+                        // 总体进度条
+                        $progress = $statusBar.find('.progress').hide(),
+
+                        // 添加的文件数量
+                        fileCount = 0,
+
+                        // 添加的文件总大小
+                        fileSize = 0,
+
+                        // 优化retina, 在retina下这个值是2
+                        ratio = window.devicePixelRatio || 1,
+
+                        // 缩略图大小
+                        thumbnailWidth = 110 * ratio,
+                        thumbnailHeight = 110 * ratio,
+
+                        // 可能有pedding, ready, uploading, confirm, done.
+                        state = 'pedding',
+
+                        // 所有文件的进度信息，key为file id
+                        percentages = {},
+
+                        supportTransition = (function () {
+                            var s = document.createElement('p').style,
+                                r = 'transition' in s ||
+                                    'WebkitTransition' in s ||
+                                    'MozTransition' in s ||
+                                    'msTransition' in s ||
+                                    'OTransition' in s;
+                            s = null;
+                            return r;
+                        })(),
+
+                        // WebUploader实例
+                        uploader;
+
+                    if (!WebUploader.Uploader.support()) {
+                        alert('Web Uploader 不支持您的浏览器！如果你使用的是IE浏览器，请尝试升级 flash 播放器');
+                        throw new Error('WebUploader does not support the browser you are using.');
+                    }
+
+
+                    // 实例化
+                    uploader = WebUploader.create({
+                        pick: {
+                            id: '#filePicker',
+                            label: '点击选择图片'
+                        },
+                        fileVal: 'file',
+                        formData:{
+                            format: 'image',
+                            source:'local'
+                        },
+                        dnd: '#uploader .queueList',
+                        paste: document.body,
+
+                        accept: {
+                            title: 'Images',
+                            extensions: 'gif,jpg,jpeg,bmp,png',
+                            mimeTypes: 'image/*'
+                        },
+
+                        // swf文件路径
+                        swf: BASE_URL + '/js/Uploader.swf',
+
+                        disableGlobalDnd: true,
+
+                        chunked: true,
+                        server: '@Url.Action("Upload","Assets", new { area = "Admin" })',
+                        fileNumLimit: 300,
+                        fileSizeLimit: 5 * 1024 * 1024,    // 200 M
+                        fileSingleSizeLimit: 1 * 1024 * 1024    // 50 M
+                    });
+
+                    // 添加“添加文件”的按钮，
+                    uploader.addButton({
+                        id: '#filePicker2',
+                        label: '继续添加'
+                    });
+
+                    // 当有文件添加进来时执行，负责view的创建
+                    function addFile(file) {
+                        var $li = $('<li id="' + file.id + '">' +
+                            '<p class="title">' + file.name + '</p>' +
+                            '<p class="imgWrap"></p>' +
+                            '<p class="progress"><span></span></p>' +
+                            '</li>'),
+
+                            $btns = $('<div class="file-panel">' +
+                                '<span class="cancel">删除</span>' +
+                                '<span class="rotateRight">向右旋转</span>' +
+                                '<span class="rotateLeft">向左旋转</span></div>').appendTo($li),
+                            $prgress = $li.find('p.progress span'),
+                            $wrap = $li.find('p.imgWrap'),
+                            $info = $('<p class="error"></p>'),
+
+                            showError = function (code) {
+                                switch (code) {
+                                    case 'exceed_size':
+                                        text = '文件大小超出';
+                                        break;
+
+                                    case 'interrupt':
+                                        text = '上传暂停';
+                                        break;
+
+                                    default:
+                                        text = '上传失败，请重试';
+                                        break;
+                                }
+
+                                $info.text(text).appendTo($li);
+                            };
+
+                        if (file.getStatus() === 'invalid') {
+                            showError(file.statusText);
+                        } else {
+                            // todo lazyload
+                            $wrap.text('预览中');
+                            uploader.makeThumb(file, function (error, src) {
+                                if (error) {
+                                    $wrap.text('不能预览');
+                                    return;
+                                }
+
+                                var img = $('<img src="' + src + '">');
+                                $wrap.empty().append(img);
+                            }, thumbnailWidth, thumbnailHeight);
+
+                            percentages[file.id] = [file.size, 0];
+                            file.rotation = 0;
+                        }
+
+                        file.on('statuschange', function (cur, prev) {
+                            if (prev === 'progress') {
+                                $prgress.hide().width(0);
+                            } else if (prev === 'queued') {
+                                $li.off('mouseenter mouseleave');
+                                $btns.remove();
+                            }
+
+                            // 成功
+                            if (cur === 'error' || cur === 'invalid') {
+                                console.log(file.statusText);
+                                showError(file.statusText);
+                                percentages[file.id][1] = 1;
+                            } else if (cur === 'interrupt') {
+                                showError('interrupt');
+                            } else if (cur === 'queued') {
+                                percentages[file.id][1] = 0;
+                            } else if (cur === 'progress') {
+                                $info.remove();
+                                $prgress.css('display', 'block');
+                            } else if (cur === 'complete') {
+                                $li.append('<span class="success"></span>');
+                            }
+
+                            $li.removeClass('state-' + prev).addClass('state-' + cur);
+                        });
+
+                        $li.on('mouseenter', function () {
+                            $btns.stop().animate({ height: 30 });
+                        });
+
+                        $li.on('mouseleave', function () {
+                            $btns.stop().animate({ height: 0 });
+                        });
+
+                        $btns.on('click', 'span', function () {
+                            var index = $(this).index(),
+                                deg;
+
+                            switch (index) {
+                                case 0:
+                                    uploader.removeFile(file);
+                                    return;
+
+                                case 1:
+                                    file.rotation += 90;
+                                    break;
+
+                                case 2:
+                                    file.rotation -= 90;
+                                    break;
+                            }
+
+                            if (supportTransition) {
+                                deg = 'rotate(' + file.rotation + 'deg)';
+                                $wrap.css({
+                                    '-webkit-transform': deg,
+                                    '-mos-transform': deg,
+                                    '-o-transform': deg,
+                                    'transform': deg
+                                });
+                            } else {
+                                $wrap.css('filter', 'progid:DXImageTransform.Microsoft.BasicImage(rotation=' + (~~((file.rotation / 90) % 4 + 4) % 4) + ')');
+                                // use jquery animate to rotation
+                                // $({
+                                //     rotation: rotation
+                                // }).animate({
+                                //     rotation: file.rotation
+                                // }, {
+                                //     easing: 'linear',
+                                //     step: function( now ) {
+                                //         now = now * Math.PI / 180;
+
+                                //         var cos = Math.cos( now ),
+                                //             sin = Math.sin( now );
+
+                                //         $wrap.css( 'filter', "progid:DXImageTransform.Microsoft.Matrix(M11=" + cos + ",M12=" + (-sin) + ",M21=" + sin + ",M22=" + cos + ",SizingMethod='auto expand')");
+                                //     }
+                                // });
+                            }
+
+
+                        });
+
+                        $li.appendTo($queue);
+                    }
+
+                    // 负责view的销毁
+                    function removeFile(file) {
+                        var $li = $('#' + file.id);
+
+                        delete percentages[file.id];
+                        updateTotalProgress();
+                        $li.off().find('.file-panel').off().end().remove();
+                    }
+
+                    function updateTotalProgress() {
+                        var loaded = 0,
+                            total = 0,
+                            spans = $progress.children(),
+                            percent;
+
+                        $.each(percentages, function (k, v) {
+                            total += v[0];
+                            loaded += v[0] * v[1];
+                        });
+
+                        percent = total ? loaded / total : 0;
+
+                        spans.eq(0).text(Math.round(percent * 100) + '%');
+                        spans.eq(1).css('width', Math.round(percent * 100) + '%');
+                        updateStatus();
+                    }
+
+                    function updateStatus() {
+                        var text = '', stats;
+
+                        if (state === 'ready') {
+                            text = '选中' + fileCount + '张图片，共' +
+                                WebUploader.formatSize(fileSize) + '。';
+                        } else if (state === 'confirm') {
+                            stats = uploader.getStats();
+                            if (stats.uploadFailNum) {
+                                text = '已成功上传' + stats.successNum + '张照片至XX相册，' +
+                                    stats.uploadFailNum + '张照片上传失败，<a class="retry" href="#">重新上传</a>失败图片或<a class="ignore" href="#">忽略</a>'
+                            }
+
+                        } else {
+                            stats = uploader.getStats();
+                            text = '共' + fileCount + '张（' +
+                                WebUploader.formatSize(fileSize) +
+                                '），已上传' + stats.successNum + '张';
+
+                            if (stats.uploadFailNum) {
+                                text += '，失败' + stats.uploadFailNum + '张';
+                            }
+                        }
+
+                        $info.html(text);
+                    }
+
+                    function setState(val) {
+                        var file, stats;
+
+                        if (val === state) {
+                            return;
+                        }
+
+                        self.$uploadBtn.removeClass('state-' + state);
+                        self.$uploadBtn.addClass('state-' + val);
+                        state = val;
+
+                        switch (state) {
+                            case 'pedding':
+                                $placeHolder.removeClass('element-invisible');
+                                $queue.parent().removeClass('filled');
+                                $queue.hide();
+                                $statusBar.addClass('element-invisible');
+                                uploader.refresh();
+                                break;
+
+                            case 'ready':
+                                $placeHolder.addClass('element-invisible');
+                                $('#filePicker2').removeClass('element-invisible');
+                                $queue.parent().addClass('filled');
+                                $queue.show();
+                                $statusBar.removeClass('element-invisible');
+                                uploader.refresh();
+                                break;
+
+                            case 'uploading':
+                                $('#filePicker2').addClass('element-invisible');
+                                $progress.show();
+                                self.$uploadBtn.text('暂停上传');
+                                break;
+
+                            case 'paused':
+                                $progress.show();
+                                self.$uploadBtn.text('继续上传');
+                                break;
+
+                            case 'confirm':
+                                $progress.hide();
+                                self.$uploadBtn.text('开始上传').addClass('disabled');
+
+                                stats = uploader.getStats();
+                                if (stats.successNum && !stats.uploadFailNum) {
+                                    setState('finish');
+                                    return;
+                                }
+                                break;
+                            case 'finish':
+                                stats = uploader.getStats();
+                                if (stats.successNum) {
+                                    //alert('上传成功');
+                                } else {
+                                    // 没有成功的图片，重设
+                                    state = 'done';
+                                    location.reload();
+                                }
+                                break;
+                        }
+
+                        updateStatus();
+                    }
+
+                    uploader.onUploadProgress = function (file, percentage) {
+                        var $li = $('#' + file.id),
+                            $percent = $li.find('.progress span');
+
+                        $percent.css('width', percentage * 100 + '%');
+                        percentages[file.id][1] = percentage;
+                        updateTotalProgress();
+                    };
+
+                    uploader.onFileQueued = function (file) {
+                        fileCount++;
+                        fileSize += file.size;
+
+                        if (fileCount === 1) {
+                            $placeHolder.addClass('element-invisible');
+                            $statusBar.show();
+                        }
+
+                        addFile(file);
+                        setState('ready');
+                        updateTotalProgress();
+                    };
+
+                    uploader.onFileDequeued = function (file) {
+                        fileCount--;
+                        fileSize -= file.size;
+
+                        if (!fileCount) {
+                            setState('pedding');
+                        }
+
+                        removeFile(file);
+                        updateTotalProgress();
+
+                    };
+
+                    uploader.on('all', function (type) {
+                        var stats;
+                        switch (type) {
+                            case 'uploadFinished':
+                                setState('confirm');
+                                break;
+
+                            case 'startUpload':
+                                setState('uploading');
+                                break;
+
+                            case 'stopUpload':
+                                setState('paused');
+                                break;
+
+                        }
+                    });
+
+                    uploader.onUploadSuccess = function (file,response) {
+                        console.log('response', response)
+                        var html = template('tpl_thumb_item', [response.data]);
+                        self.$list.prepend(html);
+                        setTimeout(function () { 
+                            window.location.reload();
+                        },200);
+                    };
+
+                    uploader.onError = function (code) {
+                        alert('Eroor: ' + code);
+                    };
+
+                    self.$uploadBtn.on('click', function () {
+                        if ($(this).hasClass('disabled')) {
+                            return false;
+                        }
+
+                        if (state === 'ready') {
+                            uploader.upload();
+                        } else if (state === 'paused') {
+                            uploader.upload();
+                        } else if (state === 'uploading') {
+                            uploader.stop();
+                        }
+                    });
+
+                    $info.on('click', '.retry', function () {
+                        uploader.retry();
+                    });
+
+                    $info.on('click', '.ignore', function () {
+                        alert('todo');
+                    });
+
+                    self.$uploadBtn.addClass('state-' + state);
+                    updateTotalProgress();
+                }
+            }
+
+            new Page();
+
+        })(jQuery,window)
+    </script>
+
+    <script type="text/html" id="tpl_thumb_item">
+        {{each}}
+        <div class="thumb-item" data-original="{{$value.url}}" data-id="{{$value.rowId}}">
+            <div class="copy">
+                <button type="button" class="mr-1 btn btn-outline-primary btn-sm btn-preview" style="border-radius: 0;"><i class="ti-fullscreen"></i></button>
+                <button type="button" class="mr-1 btn btn-outline-primary btn-sm" style="border-radius: 0;"><i class="ti-layers"></i></button>
+                <button type="button" class="btn btn-outline-primary btn-sm" style="border-radius: 0;"><i class="ti-trash"></i></button>
+            </div>
+            <i role="img" class="thumb-item-img" style="background-image:url('{{$value.url}}')"></i>
+            <div class="title">{{$value.name}}</div>
+        </div>
+        {{/each}}
+    </script>
+}

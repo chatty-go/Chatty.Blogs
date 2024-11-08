@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Areas\Admin\Models\Article\r1d3x2gk.dmw~" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mapster" Version="7.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Chatty.Blogs.Core\Chatty.Blogs.Core.csproj" />
+    <ProjectReference Include="..\Chatty.Blogs.Database\Chatty.Blogs.Database.csproj" />
+    <ProjectReference Include="..\Chatty.Blogs.Services\Chatty.Blogs.Services.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\plugins\dayjs\locale\" />
+    <Folder Include="wwwroot\plugins\dayjs\plugin\" />
+    <Folder Include="wwwroot\plugins\masonry\" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,177 @@
+﻿@model Chatty.Blogs.Web.ViewModels.ContactIndexViewModel
+@inject IViewLocalizer L
+@{
+    ViewData["Title"] = @L["Page_Title"];
+}
+
+<!-- page header -->
+<section class="page-header">
+    <div class="container-xl">
+        <div class="text-center">
+            <h1 class="mt-0 mb-2">@L["Page_Title"]</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center mb-0">
+                    <li class="breadcrumb-item"><a href="#">@L["Page_Home"]</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">@L["Page_Title"]</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<!-- section main content -->
+<section class="main-content">
+    <div class="container-xl">
+
+        <div class="row">
+
+            <div class="col-md-4">
+                <!-- contact info item -->
+                <div class="contact-item bordered rounded d-flex align-items-center">
+                    <span class="icon icon-phone"></span>
+                    <div class="details">
+                        <h3 class="mb-0 mt-0">Phone</h3>
+                        <p class="mb-0">@Model.Contact?.ContactPhone</p>
+                    </div>
+                </div>
+                <div class="spacer d-md-none d-lg-none" data-height="30"></div>
+            </div>
+
+            <div class="col-md-4">
+                <!-- contact info item -->
+                <div class="contact-item bordered rounded d-flex align-items-center">
+                    <span class="icon icon-envelope-open"></span>
+                    <div class="details">
+                        <h3 class="mb-0 mt-0">E-Mail</h3>
+                        <p class="mb-0">@Model.Contact?.ContactEmail</p>
+                    </div>
+                </div>
+                <div class="spacer d-md-none d-lg-none" data-height="30"></div>
+            </div>
+
+            <div class="col-md-4">
+                <!-- contact info item -->
+                <div class="contact-item bordered rounded d-flex align-items-center">
+                    <span class="icon icon-map"></span>
+                    <div class="details">
+                        <h3 class="mb-0 mt-0">Location</h3>
+                        <p class="mb-0">@Model.Contact?.ContactAddress</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="spacer" data-height="50"></div>
+
+        <!-- section header -->
+        <div class="section-header">
+            <h3 class="section-title">@L["Page_Form_Ttile"]：</h3>
+            <img src="images/wave.svg" class="wave" alt="wave" />
+        </div>
+
+        <!-- Contact Form -->
+        <form id="contact-form" class="contact-form" method="post" novalidate>
+            @Html.AntiForgeryToken()
+            <div class="messages"></div>
+
+            <div class="row">
+                <div class="column col-md-6">
+                    <!-- Name input -->
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="name" placeholder="@L["Page_Form_Model_Name"]" required="required" data-error="Name is required.">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="column col-md-6">
+                    <!-- Email input -->
+                    <div class="form-group">
+                        <input type="email" class="form-control" name="email" placeholder="@L["Page_Form_Model_EmailAddress"]" required="required" data-error="Email is required.">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="column col-md-12">
+                    <!-- Email input -->
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="subject" placeholder="@L["Page_Form_Model_Subject"]" required="required" data-error="Subject is required.">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="column col-md-12">
+                    <!-- Message textarea -->
+                    <div class="form-group">
+                        <textarea name="content" class="form-control" rows="4" placeholder="@L["Page_Form_Model_Message"]" required="required" data-error="Message is required."></textarea>
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" id="btnSubmit" class="btn btn-default">@L["Page_Form_Action_Submit"]</button><!-- Send Button -->
+
+        </form>
+        <!-- Contact Form end -->
+    </div>
+</section>
+
+@section Scripts {
+
+    <script>
+
+        function Page(){
+
+            this.init();
+        }
+
+        Page.prototype = {
+            init:function(){
+                this.bindEvent();
+            },
+            bindEvent:function(){
+
+                $('#contact-form').on('submit', function (e) {
+                    e.preventDefault();
+
+                    // 获取表单元素
+                    var form = e.target;
+
+                    // 检查表单是否有效
+                    if (!form.checkValidity()) {
+                        form.classList.add('was-validated');
+                    }else{
+                        var formData = $(form).serializeObject();
+
+                        $.post("@Url.Action("SendMessage", "Contact")", formData, function (res) {
+                            if (res.code === 1) {
+                                form.reset();
+                                form.classList.remove('was-validated');
+                                alert('提交留言成功');
+                                $('#btnSubmit').attr('disabled', 'disabled')
+                            } else {
+                                cocoMessage.error(res.errorMsg);
+                            }
+                        }).fail(function (res) {
+                            var result = res.responseJSON;
+                            if (result && result.details){
+                                alert('保存失败:'+result.details);
+                            }else{
+
+                                alert('保存失败');
+                            }
+
+                        });
+                    }
+
+                });
+
+            },
+        }
+
+        $(function () {
+            new Page();
+        });
+
+    </script>
+}

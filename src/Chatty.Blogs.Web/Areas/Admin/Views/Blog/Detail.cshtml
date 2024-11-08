@@ -1,0 +1,40 @@
+﻿@model Chatty.Blogs.Web.Areas.Admin.ViewModels.ArticleDetailViewModel
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = Model.Article.Title;
+}
+
+<style>
+    .rich-title {
+        font-size: 28px;
+        padding-top: 20px;
+    }
+
+    .rich-meta {
+        font-size: 12px;
+        color: #5e6c84;
+        line-height: 1.5;
+        font-weight: 300;
+        margin-bottom: 20px;
+    }
+
+    .container {
+        padding-top: 70px;
+        padding-left: 40px;
+        padding-right: 40px;
+        padding-bottom: 40px;
+        border: 1px solid #f1f1f1;
+        border-radius: 6px;
+    }
+
+    .container img{
+        max-width:100%;
+    }
+</style>
+
+<div class="container">
+    <h1 class="rich-title">@Model.Article.Title</h1>
+    <p>@Html.Raw(Model.Article.Content)</p>
+</div>

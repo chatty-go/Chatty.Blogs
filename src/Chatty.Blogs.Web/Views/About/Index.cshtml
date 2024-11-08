@@ -1,0 +1,124 @@
+﻿@inject IViewLocalizer L
+@using Chatty.Blogs.Entities.Blogs
+@model Chatty.Blogs.Web.ViewModels.AboutIndexViewModel
+@{
+	ViewData["Title"] = @L["Page_Title"];
+	var siteConfig = ViewBag.SiteConfig as SiteConfig;
+}
+
+<!-- page header -->
+<section class="page-header">
+	<div class="container-xl">
+		<div class="text-center">
+			<h1 class="mt-0 mb-2">@L["Page_Title"]</h1>
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb justify-content-center mb-0">
+					<li class="breadcrumb-item"><a href="#">@L["Page_Home"]</a></li>
+					<li class="breadcrumb-item active" aria-current="page">@L["Page_Title"]</li>
+				</ol>
+			</nav>
+		</div>
+	</div>
+</section>
+
+<!-- section main content -->
+<section class="main-content">
+	<div class="container-xl">
+
+		<div class="row gy-4">
+
+			<div class="col-lg-8">
+
+				<div class="page-content bordered rounded padding-30">
+
+					<img src="@Url.Content(siteConfig?.AuthorAvatar)" alt="@siteConfig?.AuthorName" class="rounded mb-4" />
+
+					<p>@siteConfig?.AuthorDesc</p>
+
+
+					<hr class="my-4" />
+					<ul class="social-icons list-unstyled list-inline mb-0">
+						
+					</ul>
+
+				</div>
+
+			</div>
+			<div class="col-lg-4">
+
+				<!-- sidebar -->
+				<div class="sidebar">
+					
+					<!-- widget popular posts -->
+					<div class="widget rounded">
+						<div class="widget-header text-center">
+							<h3 class="widget-title">Popular Posts</h3>
+							<img src="~/images/wave.svg" class="wave" alt="wave" />
+						</div>
+						<div class="widget-content">
+							<!-- post -->
+							@foreach (var item in Model.PopularArticles)
+							{
+								<div class="post post-list-sm circle">
+									<div class="thumb circle">
+										<a href="@Url.Action("Detail","Blog", new { id = item.RowId })">
+											<div class="inner" style="background-image: url('@Url.Content(item.CoverUrl)')">
+												
+											</div>
+										</a>
+									</div>
+									<div class="details clearfix">
+										<h6 class="post-title my-0"><a href="@Url.Action("Detail","Blog", new { id = item.RowId })">@item.Title</a></h6>
+										<ul class="meta list-inline mt-1 mb-0">
+											<li class="list-inline-item">@item.CreatedDate?.ToString("yyyy-MM-dd")</li>
+										</ul>
+									</div>
+								</div>
+							}
+							
+						</div>
+					</div>
+
+					<!-- widget categories -->
+					<div class="widget rounded">
+						<div class="widget-header text-center">
+							<h3 class="widget-title">Explore Topics</h3>
+							<img src="~/images/wave.svg" class="wave" alt="wave" />
+						</div>
+						<div class="widget-content">
+							<ul class="list">
+								@foreach (var category in Model.Categories)
+								{
+									<li><a href="@Url.Action("Index","Blog",new { cateid=category.RowId})">@category.Name</a><span></span></li>
+								}
+							</ul>
+						</div>
+
+					</div>
+
+					<!-- widget newsletter -->
+					<div class="widget rounded">
+						<div class="widget-header text-center">
+							<h3 class="widget-title">Newsletter</h3>
+							<img src="~/images/wave.svg" class="wave" alt="wave" />
+						</div>
+						<div class="widget-content">
+							<span class="newsletter-headline text-center mb-3">Join 70,000 subscribers!</span>
+							<form>
+								<div class="mb-2">
+									<input class="form-control w-100 text-center" placeholder="Email address…" type="email">
+								</div>
+								<button class="btn btn-default btn-full" type="submit">Sign Up</button>
+							</form>
+							<span class="newsletter-privacy text-center mt-3">By signing up, you agree to our <a href="#">Privacy Policy</a></span>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+	</div>
+</section>

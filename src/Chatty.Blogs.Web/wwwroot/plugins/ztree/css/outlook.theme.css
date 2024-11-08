@@ -1,0 +1,86 @@
+﻿.ztree * {
+font-size: 10pt;
+font-family: "Microsoft Yahei",Verdana,Simsun,"Segoe UI Web Light","Segoe UI Light","Segoe UI Web Regular","Segoe UI","Segoe UI Symbol","Helvetica Neue",Arial
+}
+
+.ztree li ul{
+    padding:0;
+}
+
+.ztree>li>a{
+    padding: 4px 4px 4px 14px;
+}
+
+.ztree li ul li a{
+    padding: 4px 4px 4px 30px;
+}
+
+.ztree li {
+    line-height: 30px;
+}
+
+.ztree li a {
+width: 100%;
+height: inherit;
+margin: 2px 0;
+}
+
+.ztree li a:hover {
+text-decoration: none;
+background-color: #f6f7f8;
+}
+
+
+
+.ztree.showIcon li a span.button.switch {
+visibility: visible
+}
+
+.ztree li a.curSelectedNode {
+    background-color: #f6f7f8;
+    border: 0;
+    height: inherit;
+    padding-top: 4px;
+    box-shadow: -2px 0px 0px 0px var(--main-color);
+    color: var(--main-color);
+}
+
+
+.ztree li span.button {
+background-image: url("");
+}
+
+
+
+
+.ztree li span.button.noline_open {
+font-family: themify;
+speak: none;
+font-style: normal;
+font-weight: 400;
+font-variant: normal;
+text-transform: none;
+line-height: 1.2;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+}
+
+.ztree li span.button.noline_open::before {
+content: "\e64b";
+}
+
+.ztree li span.button.noline_close {
+font-family: themify;
+speak: none;
+font-style: normal;
+font-weight: 400;
+font-variant: normal;
+text-transform: none;
+line-height: 1.2;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+}
+
+.ztree li span.button.noline_close::before {
+content: "\e649";font-size: 12px;
+}
