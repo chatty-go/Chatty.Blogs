@@ -81,6 +81,22 @@ server=localhost;Database=chatty_blogs;Uid=;Pwd=
 默认密码：123456
 
 
+## 如何部署  
+
+### Windows IIS
+
+1、发布项目: 右键点击项目，选择发布，选择发布到文件系统，选择发布路径，然后点击发布。
+2、在服务器中安装.netcore 8 运行时  
+3、在服务器创建一个目录，例如：D:\chatty，把打包后的项目放到这个目录下面  
+4、在IIS中创建一个网站，指向这个目录，然后重启IIS即可。  
+
+
+### Linux Ubuntu  
+
+On My Way !!   
+HH  
+
+
 
 ## 我的邮箱
 
