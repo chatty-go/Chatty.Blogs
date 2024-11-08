@@ -36,10 +36,16 @@
 * 跨平台部署
   - Windows, macOS and Linux ready.
 
+## 在线预览  
+
+on my way!!!  
+
+
+
 ## 准备工作
 
 1、安装 Visual Studio 2022 开发工具  
-2、安装MySQL 8.0 数据库
+2、安装MySQL 8.0 数据库 . (ORM基于SqlSugar，理论SqlSugar支持的数据库都支持，暂未适配其它数据库脚本)
 
 ## 如何使用
 
